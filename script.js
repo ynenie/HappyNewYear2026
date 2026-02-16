@@ -391,9 +391,10 @@ class Particle {
         // Hiệu ứng fade out đẹp - điểm sáng mờ dần
         const isFading = this.alpha < 0.3;
         const fadeProgress = isFading ? (this.alpha / 0.3) : 1;
+        const isMobile = window.innerWidth < 768;
         
-        // Draw trail - dài và đẹp hơn (trừ glitter ít trail)
-        if (this.type !== 'glitter' && !isFading) {
+        // Draw trail - BỎ TRÊN MOBILE để giảm lag
+        if (!isMobile && this.type !== 'glitter' && !isFading) {
             for (let i = 0; i < this.trail.length - 1; i++) {
                 const t = this.trail[i];
                 const alpha = (i / this.trail.length) * this.alpha * 0.6;
@@ -426,27 +427,34 @@ class Particle {
             glowSize = glowSize * (1 + (1 - fadeProgress) * 1.5);
         }
         
-        // Glow - mạnh hơn cho outer và glitter, có hiệu ứng fade
-        const gradient = ctx.createRadialGradient(this.x, this.y, 0, this.x, this.y, currentSize * glowSize);
-        
-        if (isFading) {
-            // Khi fade: core sáng hơn, glow rộng hơn
-            gradient.addColorStop(0, this.fadingColor);
-            gradient.addColorStop(0.3, hexToRgba(this.fadingColor, 0.7 * fadeProgress));
-            gradient.addColorStop(0.7, hexToRgba(this.fadingColor, 0.3 * fadeProgress));
-            gradient.addColorStop(1, 'rgba(0, 0, 0, 0)');
+        // Glow - ĐƠN GIẢN HƠN TRÊN MOBILE
+        if (isMobile) {
+            // Mobile: vẽ đơn giản, không dùng gradient
+            ctx.globalAlpha = this.alpha * 0.5;
+            ctx.fillStyle = this.fadingColor;
+            ctx.fillRect(this.x - currentSize * 1.5, this.y - currentSize * 1.5, currentSize * 3, currentSize * 3);
         } else {
-            gradient.addColorStop(0, this.fadingColor);
-            gradient.addColorStop(0.5, hexToRgba(this.fadingColor, 0.5));
-            gradient.addColorStop(1, 'rgba(0, 0, 0, 0)');
+            // Desktop: vẽ gradient đẹp
+            const gradient = ctx.createRadialGradient(this.x, this.y, 0, this.x, this.y, currentSize * glowSize);
+            
+            if (isFading) {
+                gradient.addColorStop(0, this.fadingColor);
+                gradient.addColorStop(0.3, hexToRgba(this.fadingColor, 0.7 * fadeProgress));
+                gradient.addColorStop(0.7, hexToRgba(this.fadingColor, 0.3 * fadeProgress));
+                gradient.addColorStop(1, 'rgba(0, 0, 0, 0)');
+            } else {
+                gradient.addColorStop(0, this.fadingColor);
+                gradient.addColorStop(0.5, hexToRgba(this.fadingColor, 0.5));
+                gradient.addColorStop(1, 'rgba(0, 0, 0, 0)');
+            }
+            
+            ctx.fillStyle = gradient;
+            ctx.fillRect(this.x - currentSize * glowSize, this.y - currentSize * glowSize, currentSize * glowSize * 2, currentSize * glowSize * 2);
         }
         
-        ctx.fillStyle = gradient;
-        ctx.fillRect(this.x - currentSize * glowSize, this.y - currentSize * glowSize, currentSize * glowSize * 2, currentSize * glowSize * 2);
-        
-        // Core - sáng hơn, glitter có shadow mạnh hơn
-        // Khi fade out - core sáng hơn và blur mạnh hơn
-        const shadowBlur = this.type === 'glitter' ? 12 : 8;
+        // Core - sáng hơn, GIẢM SHADOW TRÊN MOBILE
+        ctx.globalAlpha = this.alpha;
+        const shadowBlur = isMobile ? 3 : (this.type === 'glitter' ? 12 : 8);
         ctx.shadowBlur = isFading ? shadowBlur * (1.5 + (1 - fadeProgress)) : shadowBlur;
         ctx.shadowColor = this.fadingColor;
         ctx.fillStyle = this.fadingColor;
@@ -463,20 +471,21 @@ class Rocket {
         this.targetY = targetY;
         this.colors = colors;
         this.vx = (Math.random() - 0.5) * 2;
-        this.vy = -9.5; // Tăng cao hơn nữa - bay rất cao
+        this.vy = -12; // Bay nhanh hơn để nổ sớm, giảm lag
         this.exploded = false;
         this.trail = [];
     }
 
     update() {
         this.trail.push({ x: this.x, y: this.y });
-        if (this.trail.length > 10) {
+        const maxTrail = window.innerWidth < 768 ? 5 : 7;
+        if (this.trail.length > maxTrail) {
             this.trail.shift();
         }
 
         this.x += this.vx;
         this.y += this.vy;
-        this.vy += 0.08; // Giảm gia tốc - bay chậm hơn
+        this.vy += 0.15; // Tăng gravity để nhanh hơn
 
         if (this.y <= this.targetY || this.vy >= 0) {
             this.exploded = true;
@@ -598,14 +607,28 @@ function launchRocket() {
     rockets.push(new Rocket(x, y, targetY, colors));
 }
 
-// Animation loop
+// Animation loop with FPS management
 let lastTime = 0;
+let frameCount = 0;
+const isMobileDevice = window.innerWidth < 768;
+
 function animate(currentTime) {
     const deltaTime = currentTime - lastTime;
+    
+    // FPS throttle for mobile - skip every other frame if needed
+    if (isMobileDevice) {
+        frameCount++;
+        if (frameCount % 2 === 0 && particles.length > 100) {
+            requestAnimationFrame(animate);
+            return;
+        }
+    }
+    
     lastTime = currentTime;
     
-    // Clear with fade
-    ctx.fillStyle = 'rgba(0, 0, 0, 0.1)';
+    // Clear with faster fade (reduce trail persistence)
+    const fadeAlpha = isMobileDevice ? 0.25 : 0.18;
+    ctx.fillStyle = `rgba(0, 0, 0, ${fadeAlpha})`;
     ctx.fillRect(0, 0, canvas.width, canvas.height);
     
     // Update and draw rockets
@@ -633,17 +656,23 @@ function animate(currentTime) {
     requestAnimationFrame(animate);
 }
 
-// Auto launch - chậm và ít để thưởng thức
+// Auto launch - tối ưu để giảm lag
 function autoLaunch() {
-    const numRockets = Math.random() > 0.9 ? 2 : 1;  // 90% là 1 pháo, 10% là 2
+    const isMobile = window.innerWidth < 768;
+    
+    // Mobile: ít pháo hơn
+    const numRockets = isMobile ? 1 : (Math.random() > 0.85 ? 2 : 1);
     
     for (let i = 0; i < numRockets; i++) {
         setTimeout(() => {
             launchRocket();
-        }, i * 400);  // Tăng khoảng cách giữa các pháo trong 1 đợt
+        }, i * 500);
     }
     
-    const delay = Math.random() * 1500 + 1500;  // 1500-3000ms giữa các đợt (chậm hơn)
+    // Delay lâu hơn để giảm tải - mobile còn lâu hơn nữa
+    const minDelay = isMobile ? 3000 : 2500;
+    const maxDelay = isMobile ? 6000 : 5000;
+    const delay = Math.random() * (maxDelay - minDelay) + minDelay;
     setTimeout(autoLaunch, delay);
 }
 
@@ -748,7 +777,7 @@ function startCountdown() {
                         autoLaunch();
                     }, 2000);
                     
-                    // 4. Sau 5s: Ẩn text và hiện lời chúc (timing ngắn hơn, khớp với pháo hoa)
+                    // 4. Sau 7s: Ẩn text và hiện lời chúc (đủ thời gian xem pháo hoa nổ)
                     setTimeout(() => {
                         newyearText.style.transition = 'opacity 0.8s ease-out';
                         newyearText.style.opacity = '0';
@@ -773,7 +802,7 @@ function startCountdown() {
                                 }, 7000);
                             }
                         }, 800);
-                    }, 5000);
+                    }, 7000);
                     
                 }, 1000);
                 
