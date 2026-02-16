@@ -739,58 +739,19 @@ function startCountdown() {
                         countdownContainer.style.display = 'none';
                     }, 500);
                     
-                    // BẮT ĐẦU NGAY - Pháo hoa và text cùng lúc để đồng bộ
+                    // BẮN PHÁO HOA NGAY - Không có text, chỉ pháo hoa thôi!
                     
-                    // 1. Hiện text Chúc Mừng Năm Mới NGAY (không delay)
-                    newyearText.style.display = 'block';
-                    newyearText.style.opacity = '0';
-                    newyearText.style.transition = 'opacity 0.8s ease-out';
-                    // Trigger animation ngay
-                    requestAnimationFrame(() => {
-                        newyearText.style.opacity = '1';
-                    });
-                    
-                    // 2. BẮN 5 PHÁO HOA ĐỒNG THỜI
+                    // 1. BẮN 5 PHÁO HOA ĐỒNG THỜI
                     for (let i = 0; i < 5; i++) {
                         setTimeout(() => {
                             launchRocket();
                         }, i * 300);
                     }
                     
-                    // 3. Auto launch tiếp tục
+                    // 2. Auto launch tiếp tục
                     setTimeout(() => {
                         autoLaunch();
                     }, 2000);
-                    
-                    // 4. Sau 10s: Ẩn text "Chúc Mừng Năm Mới" để tập trung vào pháo hoa
-                    setTimeout(() => {
-                        newyearText.style.transition = 'opacity 0.8s ease-out';
-                        newyearText.style.opacity = '0';
-                        
-                        setTimeout(() => {
-                            newyearText.style.display = 'none';
-                        }, 800);
-                    }, 10000);
-                    
-                    // TẠM TẮT lời chúc để tập trung vào pháo hoa
-                    /*
-                    setTimeout(() => {
-                        const wishesText = document.getElementById('wishes-text');
-                        if (wishesText) {
-                            wishesText.style.display = 'block';
-                            wishesText.style.opacity = '1';
-                            
-                            setTimeout(() => {
-                                wishesText.style.transition = 'opacity 1.2s ease-out';
-                                wishesText.style.opacity = '0';
-                                
-                                setTimeout(() => {
-                                    wishesText.style.display = 'none';
-                                }, 1200);
-                            }, 7000);
-                        }
-                    }, 7000);
-                    */
                     
                 }, 1000);
                 
