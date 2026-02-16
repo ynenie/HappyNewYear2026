@@ -762,32 +762,35 @@ function startCountdown() {
                         autoLaunch();
                     }, 2000);
                     
-                    // 4. Sau 7s: Ẩn text và hiện lời chúc (đủ thời gian xem pháo hoa nổ)
+                    // 4. Sau 10s: Ẩn text "Chúc Mừng Năm Mới" để tập trung vào pháo hoa
                     setTimeout(() => {
                         newyearText.style.transition = 'opacity 0.8s ease-out';
                         newyearText.style.opacity = '0';
                         
                         setTimeout(() => {
                             newyearText.style.display = 'none';
-                            
-                            // Hiện lời chúc dành cho em
-                            const wishesText = document.getElementById('wishes-text');
-                            if (wishesText) {
-                                wishesText.style.display = 'block';
-                                wishesText.style.opacity = '1';
-                                
-                                // Lời chúc hiển thị 7s rồi mới biến mất
-                                setTimeout(() => {
-                                    wishesText.style.transition = 'opacity 1.2s ease-out';
-                                    wishesText.style.opacity = '0';
-                                    
-                                    setTimeout(() => {
-                                        wishesText.style.display = 'none';
-                                    }, 1200);
-                                }, 7000);
-                            }
                         }, 800);
+                    }, 10000);
+                    
+                    // TẠM TẮT lời chúc để tập trung vào pháo hoa
+                    /*
+                    setTimeout(() => {
+                        const wishesText = document.getElementById('wishes-text');
+                        if (wishesText) {
+                            wishesText.style.display = 'block';
+                            wishesText.style.opacity = '1';
+                            
+                            setTimeout(() => {
+                                wishesText.style.transition = 'opacity 1.2s ease-out';
+                                wishesText.style.opacity = '0';
+                                
+                                setTimeout(() => {
+                                    wishesText.style.display = 'none';
+                                }, 1200);
+                            }, 7000);
+                        }
                     }, 7000);
+                    */
                     
                 }, 1000);
                 
