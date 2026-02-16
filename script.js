@@ -366,10 +366,10 @@ class Particle {
             this.trail.shift();
         }
         
-        // GIAI ĐOẠN NỞ (0-30 frames): Giảm friction để bay xa hơn, tạo hình cầu to
-        // GIAI ĐOẠN RƠI (30+ frames): Friction bình thường + gravity
-        const expansionPhase = this.age <= 30;
-        const currentFriction = expansionPhase ? 0.996 : this.friction;
+        // GIAI ĐOẠN NỞ (0-50 frames): Giảm friction để bay xa hơn, tạo hình cầu to
+        // GIAI ĐOẠN RƠI (50+ frames): Friction bình thường + gravity
+        const expansionPhase = this.age <= 50;  // Tăng từ 30 → 50 frames
+        const currentFriction = expansionPhase ? 0.997 : this.friction;  // Tăng từ 0.996 → 0.997
         
         this.vx *= currentFriction;
         this.vy *= currentFriction;
@@ -529,48 +529,46 @@ function createExplosion(x, y, colors) {
     }
     
     // === LỚP 1: Outer Ring - Vòng ngoài vàng đậm ===
-    const outerCount = Math.floor(30 * baseMultiplier);
+    const outerCount = Math.floor(50 * baseMultiplier);  // Tăng 30 → 50
     for (let i = 0; i < outerCount; i++) {
         particles.push(new Particle(x, y, colors, true, 'outer'));
     }
     
     // === LỚP 2: Middle Ring - Vòng giữa màu chính ===
-    const middleCount = Math.floor(45 * baseMultiplier);
+    const middleCount = Math.floor(70 * baseMultiplier);  // Tăng 45 → 70
     for (let i = 0; i < middleCount; i++) {
         particles.push(new Particle(x, y, colors, false, 'middle'));
     }
     
     // === LỚP 3: Inner Core - Lõi trong sáng ===
-    const innerCount = Math.floor(35 * baseMultiplier);
+    const innerCount = Math.floor(55 * baseMultiplier);  // Tăng 35 → 55
     for (let i = 0; i < innerCount; i++) {
         particles.push(new Particle(x, y, colors, false, 'inner'));
     }
     
     // === LỚP 4: Sparks - Tia lửa nhỏ li ti ===
-    const sparksCount = Math.floor(50 * baseMultiplier);
+    const sparksCount = Math.floor(80 * baseMultiplier);  // Tăng 50 → 80
     for (let i = 0; i < sparksCount; i++) {
         particles.push(new Particle(x, y, colors, false, 'spark'));
     }
     
-    // === LỚP 5: Glitter - Sáng lấp lánh (bỏ trên mobile) ===
-    if (!isMobile) {
-        const glitterCount = Math.floor(25 * baseMultiplier);
-        for (let i = 0; i < glitterCount; i++) {
-            particles.push(new Particle(x, y, colors, false, 'glitter'));
-        }
+    // === LỚP 5: Glitter - Sáng lấp lánh (GIỮ TRÊN MOBILE) ===
+    const glitterCount = Math.floor(40 * baseMultiplier);  // Tăng 25 → 40, bật mobile
+    for (let i = 0; i < glitterCount; i++) {
+        particles.push(new Particle(x, y, colors, false, 'glitter'));
     }
     
-    // Secondary mini explosions (chỉ trên desktop)
+    // Secondary mini explosions (tăng số lượng)
     if (!isMobile) {
         setTimeout(() => {
-            const miniCount = 2;
+            const miniCount = 3;  // Tăng 2 → 3
             for (let i = 0; i < miniCount; i++) {
                 const offset = 30 + Math.random() * 50;
                 const angle = Math.random() * Math.PI * 2;
                 const mx = x + Math.cos(angle) * offset;
                 const my = y + Math.sin(angle) * offset;
                 
-                for (let j = 0; j < Math.floor(15 * baseMultiplier); j++) {
+                for (let j = 0; j < Math.floor(25 * baseMultiplier); j++) {  // Tăng 15 → 25
                     particles.push(new Particle(mx, my, colors, false, 'mini'));
                 }
             }
