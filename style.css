@@ -172,11 +172,13 @@
     font-size: 0.95rem;
     font-weight: 400;
     color: rgba(255, 215, 0, 0.9);
-    letter-spacing: 2.5px;
+    letter-spacing: 1.5px;
+    word-spacing: 3px;
     text-shadow: 
         0 0 10px rgba(255, 215, 0, 0.6),
         0 2px 5px rgba(0, 0, 0, 0.5);
-    line-height: 1.4;
+    line-height: 1.5;
+    white-space: nowrap;
 }
 
 @keyframes greetingFadeIn {
@@ -527,7 +529,8 @@
     
     .greeting-subtitle {
         font-size: 0.75rem;
-        letter-spacing: 2px;
+        letter-spacing: 1px;
+        word-spacing: 2px;
     }
 }
 
@@ -602,7 +605,8 @@
     
     .greeting-subtitle {
         font-size: 0.65rem;
-        letter-spacing: 1.5px;
+        letter-spacing: 0.8px;
+        word-spacing: 1.5px;
     }
 }
 
