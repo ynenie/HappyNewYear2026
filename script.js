@@ -289,7 +289,7 @@ class Particle {
                 speed = Math.random() * 2.5 + 6.5;  // Tăng từ 5.5 → 6.5
                 size = (Math.random() * 1.8 + 2.8) * scaleFactor;
                 decay = 0.0025;  // Giảm từ 0.003 → 0.0025
-                maxTrail = 14;
+                maxTrail = 30;  // Tăng 14 → 30 cho dải sáng dài
                 this.color = '#ffaa44';
                 break;
                 
@@ -297,7 +297,7 @@ class Particle {
                 speed = Math.random() * 2 + 5;  // Tăng từ 4 → 5
                 size = (Math.random() * 1.5 + 2) * scaleFactor;
                 decay = 0.003;  // Giảm từ 0.0035 → 0.003
-                maxTrail = 10;
+                maxTrail = 25;  // Tăng 10 → 25
                 this.color = colors[Math.floor(Math.random() * colors.length)];
                 break;
                 
@@ -305,7 +305,7 @@ class Particle {
                 speed = Math.random() * 1.5 + 3.5;  // Tăng từ 2.5 → 3.5
                 size = (Math.random() * 1.2 + 1.5) * scaleFactor;
                 decay = 0.0035;  // Giảm từ 0.004 → 0.0035
-                maxTrail = 8;
+                maxTrail = 20;  // Tăng 8 → 20
                 this.color = colors[Math.floor(Math.random() * colors.length)];
                 break;
                 
@@ -313,7 +313,7 @@ class Particle {
                 speed = Math.random() * 3 + 7;  // Tăng từ 6 → 7
                 size = (Math.random() * 0.8 + 0.8) * scaleFactor;
                 decay = 0.005;  // Giảm từ 0.006 → 0.005
-                maxTrail = 6;
+                maxTrail = 15;  // Tăng 6 → 15
                 this.color = '#ffdd88';
                 break;
                 
@@ -321,7 +321,7 @@ class Particle {
                 speed = Math.random() * 1 + 2;  // Tăng từ 1.5 → 2
                 size = (Math.random() * 1 + 1.2) * scaleFactor;
                 decay = 0.004;  // Giảm từ 0.005 → 0.004
-                maxTrail = 4;
+                maxTrail = 10;  // Tăng 4 → 10
                 this.color = '#ffffee';
                 this.twinkle = true;  // Hiệu ứng nhấp nháy
                 this.twinkleSpeed = Math.random() * 0.1 + 0.05;
@@ -348,8 +348,8 @@ class Particle {
         
         this.alpha = 1;
         this.decay = decay;
-        this.gravity = 0.025 * scaleFactor;  // Giảm 0.035 → 0.025 để rơi chậm hơn
-        this.friction = 0.993;  // Tăng từ 0.988 → 0.993 để giữ vận tốc lâu hơn
+        this.gravity = 0.015 * scaleFactor;  // Giảm 0.025 → 0.015 để rơi cực chậm
+        this.friction = 0.995;  // Tăng 0.993 → 0.995 để giữ vận tốc lâu hơn
         this.size = size;
         this.maxTrail = maxTrail;
         
@@ -366,10 +366,10 @@ class Particle {
             this.trail.shift();
         }
         
-        // GIAI ĐOẠN NỞ (0-45 frames): Giảm friction để bay xa hơn, tạo hình cầu to
-        // GIAI ĐOẠN RƠI (45+ frames): Friction bình thường + gravity
-        const expansionPhase = this.age <= 45;  // Tăng 35 → 45 frames cho nở tòan
-        const currentFriction = expansionPhase ? 0.997 : this.friction;
+        // GIAI ĐOẠN NỞ (0-65 frames): Giảm friction để bay xa hơn, tạo hình cầu to
+        // GIAI ĐOẠN RƠI (65+ frames): Friction bình thường + gravity
+        const expansionPhase = this.age <= 65;  // Tăng 45 → 65 frames cho nở lâu
+        const currentFriction = expansionPhase ? 0.998 : this.friction;  // Tăng 0.997 → 0.998
         
         this.vx *= currentFriction;
         this.vy *= currentFriction;
@@ -608,8 +608,8 @@ let frameCount = 0;
 function animate(currentTime) {
     const deltaTime = currentTime - lastTime;
     
-    // FPS throttle for mobile - cải thiện logic
-    if (isMobile && particles.length > 80) {
+    // FPS throttle for mobile - tăng threshold để cho phép nhiều particles hơn
+    if (isMobile && particles.length > 150) {  // Tăng 80 → 150
         frameCount++;
         // Skip mỗi frame thứ 2 khi có nhiều particles
         if (frameCount % 2 === 0) {
@@ -620,8 +620,8 @@ function animate(currentTime) {
     
     lastTime = currentTime;
     
-    // Clear with optimized fade
-    const fadeAlpha = isMobile ? 0.08 : 0.12;
+    // Clear with VERY slow fade để trails dài đẹp như thật
+    const fadeAlpha = isMobile ? 0.05 : 0.04;  // Giảm 0.08-0.12 → 0.04-0.05
     ctx.fillStyle = `rgba(0, 0, 0, ${fadeAlpha})`;
     ctx.fillRect(0, 0, canvas.width, canvas.height);
     
