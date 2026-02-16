@@ -726,34 +726,32 @@ body {
     font-size: 7rem;
     font-weight: 900;
     background: linear-gradient(135deg, #ffd700 0%, #ffed4e 25%, #ff4444 50%, #ff8800 75%, #ffd700 100%);
-    background-size: 200% 200%;
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
-    filter: drop-shadow(0 0 20px rgba(255, 215, 0, 0.8))
-            drop-shadow(0 0 40px rgba(255, 136, 0, 0.6))
-            drop-shadow(0 0 60px rgba(255, 68, 68, 0.4))
-            drop-shadow(0 5px 15px rgba(0, 0, 0, 0.5));
-    animation: gradientShift 3s ease infinite, bigTextFloat 3s ease-in-out infinite;
+    /* Giảm drop-shadow từ 4 xuống 2 để giảm lag */
+    filter: drop-shadow(0 0 15px rgba(255, 215, 0, 0.9))
+            drop-shadow(0 3px 8px rgba(0, 0, 0, 0.6));
+    /* TẮT animation để giảm GPU load */
     margin-bottom: 20px;
     letter-spacing: 6px;
     line-height: 1.2;
+    will-change: opacity;
 }
 
 .year-text {
     font-size: 5rem;
     font-weight: 900;
     background: linear-gradient(135deg, #fff 0%, #ffd700 50%, #ffed4e 100%);
-    background-size: 200% 200%;
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
-    filter: drop-shadow(0 0 30px rgba(255, 255, 255, 0.9))
-            drop-shadow(0 0 50px rgba(255, 215, 0, 0.7))
-            drop-shadow(0 0 70px rgba(255, 136, 0, 0.5))
-            drop-shadow(0 5px 20px rgba(0, 0, 0, 0.6));
-    animation: gradientShift 2s ease infinite, yearPulse 2s ease-in-out infinite;
+    /* Giảm drop-shadow từ 4 xuống 2 để giảm lag */
+    filter: drop-shadow(0 0 18px rgba(255, 255, 255, 1.0))
+            drop-shadow(0 4px 10px rgba(0, 0, 0, 0.7));
+    /* TẮT animation để giảm GPU load */
     letter-spacing: 12px;
+    will-change: opacity;
 }
 
 /* Animations */
@@ -799,17 +797,17 @@ body {
     font-size: 2.8rem;
     font-weight: 700;
     background: linear-gradient(135deg, #fff 0%, #ffd700 30%, #ff8844 70%, #ff4444 100%);
-    background-size: 200% 200%;
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
-    filter: drop-shadow(0 0 25px rgba(255, 215, 0, 0.8))
-            drop-shadow(0 0 45px rgba(255, 136, 68, 0.6))
-            drop-shadow(0 3px 10px rgba(0, 0, 0, 0.5));
-    animation: gradientShift 3s ease infinite;
+    /* Giảm drop-shadow từ 3 xuống 2 để giảm lag */
+    filter: drop-shadow(0 0 12px rgba(255, 215, 0, 0.9))
+            drop-shadow(0 2px 6px rgba(0, 0, 0, 0.6));
+    /* TẮT animation để giảm GPU load */
     margin: 15px 0;
     letter-spacing: 2px;
     line-height: 1.4;
+    will-change: opacity;
 }
 
 @keyframes wishFadeIn {
@@ -831,10 +829,10 @@ body {
     text-align: center;
     z-index: 100;
     pointer-events: none;
-    background: rgba(0, 0, 0, 0.6);
+    background: rgba(0, 0, 0, 0.75);
     padding: 30px 50px;
     border-radius: 30px;
-    backdrop-filter: blur(10px);
+    /* TẮT backdrop-filter để giảm GPU load */
     border: 2px solid rgba(255, 255, 255, 0.1);
 }
 
