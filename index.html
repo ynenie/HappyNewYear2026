@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chúc mừng năm mới 2026</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    
+    <!-- Google Analytics 4 -->
+    <!-- Thay YOUR_MEASUREMENT_ID bằng Measurement ID từ Google Analytics của bạn -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=YOUR_MEASUREMENT_ID"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'YOUR_MEASUREMENT_ID');
+    </script>
+</head>
+<body>
+    <canvas id="fireworks"></canvas>
+    
+    <!-- Start Overlay -->
+    <div id="start-overlay">
+        <div class="tet-decoration lantern left"></div>
+        <div class="tet-decoration lantern right"></div>
+        <div class="photo-container">
+            <div class="tet-year-badge">Tết 2026</div>
+            <div class="blossom-decor top-left"></div>
+            <div class="blossom-decor top-right"></div>
+            <div class="blossom-decor bottom-left"></div>
+            <div class="blossom-decor bottom-right"></div>
+            <img id="start-photo" src="img.jpg" alt="Ý Nhi" class="start-photo">
+            <p class="hint-text">Chạm vào ảnh để bắt đầu ✨</p>
+        </div>
+        <div class="tet-greeting">
+            <span class="greeting-line">🧧 Chúc Mừng Năm Mới 🧧</span>
+            <span class="greeting-subtitle">Vạn Sự Như Ý • An Khang Thịnh Vượng</span>
+        </div>
+    </div>
+    
+    <!-- Countdown -->
+    <div id="countdown-container" style="display: none;">
+        <!-- Main number -->
+        <div id="countdown-number">5</div>
+    </div>
+    
+    <!-- Happy New Year Text -->
+    <div id="newyear-text" style="display: none;">
+        <h1 class="big-text">HAPPY NEW YEAR!</h1>
+        <p class="year-text">2026</p>
+    </div>
+    
+    <script src="script.js"></script>
+</body>
+</html>

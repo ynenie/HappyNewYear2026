@@ -1,0 +1,785 @@
+// Canvas setup
+const canvas = document.getElementById('fireworks');
+const ctx = canvas.getContext('2d');
+
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
+
+// Scale factor cho mobile
+let scaleFactor = 1;
+function updateScaleFactor() {
+    const width = window.innerWidth;
+    if (width < 480) {
+        scaleFactor = 0.6;  // Mobile nhỏ
+    } else if (width < 768) {
+        scaleFactor = 0.75;  // Tablet nhỏ
+    } else if (width < 1024) {
+        scaleFactor = 0.9;  // Tablet lớn
+    } else {
+        scaleFactor = 1;  // Desktop
+    }
+}
+updateScaleFactor();
+
+window.addEventListener('resize', () => {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+    updateScaleFactor();
+});
+
+// ===== AUDIO SYNTHESIS =====
+let audioContext = null;
+let audioResumed = false;
+
+function initAudioContext() {
+    if (!audioContext) {
+        try {
+            audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        } catch (e) {
+            console.log('AudioContext creation failed:', e);
+            return;
+        }
+    }
+    if (audioContext && audioContext.state === 'suspended') {
+        audioContext.resume().catch(e => {
+            console.log('AudioContext resume will wait for user interaction');
+        });
+    }
+}
+
+// Resume audio on first user interaction
+function resumeAudioOnInteraction() {
+    if (!audioResumed && audioContext && audioContext.state === 'suspended') {
+        audioContext.resume().then(() => {
+            audioResumed = true;
+            console.log('Audio enabled');
+        }).catch(e => {
+            console.log('Audio resume failed:', e);
+        });
+    }
+}
+
+// Add event listeners for first interaction
+document.addEventListener('click', resumeAudioOnInteraction, { once: true });
+document.addEventListener('touchstart', resumeAudioOnInteraction, { once: true });
+document.addEventListener('keydown', resumeAudioOnInteraction, { once: true });
+
+function hexToRgba(hex, alpha = 1) {
+    const r = parseInt(hex.slice(1, 3), 16);
+    const g = parseInt(hex.slice(3, 5), 16);
+    const b = parseInt(hex.slice(5, 7), 16);
+    return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+}
+
+function playLaunchSound() {
+    if (!audioContext) return;
+    
+    // Tiếng rít nhẹ khi bay
+    const whistle = audioContext.createOscillator();
+    const whistleGain = audioContext.createGain();
+    
+    whistle.frequency.setValueAtTime(600, audioContext.currentTime);
+    whistle.frequency.exponentialRampToValueAtTime(1200, audioContext.currentTime + 0.3);
+    
+    whistle.connect(whistleGain);
+    whistleGain.connect(audioContext.destination);
+    
+    whistleGain.gain.setValueAtTime(0.08, audioContext.currentTime);
+    whistleGain.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.3);
+    
+    whistle.start(audioContext.currentTime);
+    whistle.stop(audioContext.currentTime + 0.3);
+}
+
+function playExplosionSound() {
+    if (!audioContext) return;
+    
+    // ===== Tiếng "BÙM" chính - Sử dụng white noise thật với nhiều lớp tần số =====
+    
+    // Tạo white noise buffer dài hơn cho âm thanh tự nhiên
+    const bufferSize = audioContext.sampleRate * 0.8;
+    const noiseBuffer = audioContext.createBuffer(1, bufferSize, audioContext.sampleRate);
+    const output = noiseBuffer.getChannelData(0);
+    for (let i = 0; i < bufferSize; i++) {
+        output[i] = Math.random() * 2 - 1;
+    }
+    
+    // Layer 1: Sub-bass rumble (20-120Hz) - Tiếng "rung" sâu
+    const subBass = audioContext.createBufferSource();
+    subBass.buffer = noiseBuffer;
+    const subBassFilter = audioContext.createBiquadFilter();
+    subBassFilter.type = 'lowpass';
+    subBassFilter.frequency.setValueAtTime(120, audioContext.currentTime);
+    subBassFilter.frequency.exponentialRampToValueAtTime(40, audioContext.currentTime + 0.6);
+    subBassFilter.Q.value = 3;
+    const subBassGain = audioContext.createGain();
+    subBass.connect(subBassFilter);
+    subBassFilter.connect(subBassGain);
+    subBassGain.connect(audioContext.destination);
+    subBassGain.gain.setValueAtTime(0, audioContext.currentTime);
+    subBassGain.gain.linearRampToValueAtTime(0.9, audioContext.currentTime + 0.015);
+    subBassGain.gain.exponentialRampToValueAtTime(0.3, audioContext.currentTime + 0.15);
+    subBassGain.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.7);
+    subBass.start(audioContext.currentTime);
+    subBass.stop(audioContext.currentTime + 0.8);
+    
+    // Layer 2: Body thump (150-600Hz) - Thân tiếng "BÙM"
+    const body = audioContext.createBufferSource();
+    body.buffer = noiseBuffer;
+    const bodyFilter1 = audioContext.createBiquadFilter();
+    bodyFilter1.type = 'lowpass';
+    bodyFilter1.frequency.value = 600;
+    bodyFilter1.Q.value = 1.5;
+    const bodyFilter2 = audioContext.createBiquadFilter();
+    bodyFilter2.type = 'highpass';
+    bodyFilter2.frequency.value = 150;
+    const bodyGain = audioContext.createGain();
+    body.connect(bodyFilter1);
+    bodyFilter1.connect(bodyFilter2);
+    bodyFilter2.connect(bodyGain);
+    bodyGain.connect(audioContext.destination);
+    bodyGain.gain.setValueAtTime(0, audioContext.currentTime);
+    bodyGain.gain.linearRampToValueAtTime(0.8, audioContext.currentTime + 0.012);
+    bodyGain.gain.exponentialRampToValueAtTime(0.2, audioContext.currentTime + 0.12);
+    bodyGain.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5);
+    body.start(audioContext.currentTime);
+    body.stop(audioContext.currentTime + 0.6);
+    
+    // Layer 3: Sharp snap (1500Hz+) - Tiếng "sắc" lúc đầu
+    const snap = audioContext.createBufferSource();
+    snap.buffer = noiseBuffer;
+    const snapFilter = audioContext.createBiquadFilter();
+    snapFilter.type = 'highpass';
+    snapFilter.frequency.value = 1500;
+    snapFilter.Q.value = 0.8;
+    const snapGain = audioContext.createGain();
+    snap.connect(snapFilter);
+    snapFilter.connect(snapGain);
+    snapGain.connect(audioContext.destination);
+    snapGain.gain.setValueAtTime(0, audioContext.currentTime);
+    snapGain.gain.linearRampToValueAtTime(0.6, audioContext.currentTime + 0.008);
+    snapGain.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.15);
+    snap.start(audioContext.currentTime);
+    snap.stop(audioContext.currentTime + 0.2);
+    
+    // Layer 4: Mid punch (400-1200Hz) - Độ đầy
+    const punch = audioContext.createBufferSource();
+    punch.buffer = noiseBuffer;
+    const punchFilter = audioContext.createBiquadFilter();
+    punchFilter.type = 'bandpass';
+    punchFilter.frequency.value = 800;
+    punchFilter.Q.value = 1.2;
+    const punchGain = audioContext.createGain();
+    punch.connect(punchFilter);
+    punchFilter.connect(punchGain);
+    punchGain.connect(audioContext.destination);
+    punchGain.gain.setValueAtTime(0, audioContext.currentTime);
+    punchGain.gain.linearRampToValueAtTime(0.7, audioContext.currentTime + 0.01);
+    punchGain.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.35);
+    punch.start(audioContext.currentTime);
+    punch.stop(audioContext.currentTime + 0.4);
+    
+    // ===== Tiếng "nhũng nhũng" sau khi nổ =====
+    
+    // Tạo nhiều tiếng crackling liên tục
+    for (let i = 0; i < 25; i++) {
+        setTimeout(() => {
+            const crackleBuffer = audioContext.createBuffer(1, audioContext.sampleRate * 0.05, audioContext.sampleRate);
+            const crackleData = crackleBuffer.getChannelData(0);
+            for (let j = 0; j < crackleData.length; j++) {
+                crackleData[j] = Math.random() * 2 - 1;
+            }
+            
+            const crackle = audioContext.createBufferSource();
+            crackle.buffer = crackleBuffer;
+            
+            const crackleFilter = audioContext.createBiquadFilter();
+            crackleFilter.type = 'highpass';
+            crackleFilter.frequency.value = 1500 + Math.random() * 2000;
+            
+            const crackleGain = audioContext.createGain();
+            
+            crackle.connect(crackleFilter);
+            crackleFilter.connect(crackleGain);
+            crackleGain.connect(audioContext.destination);
+            
+            const volume = (0.15 + Math.random() * 0.1) * (1 - i / 30); // Giảm dần
+            crackleGain.gain.setValueAtTime(volume, audioContext.currentTime);
+            crackleGain.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.08);
+            
+            crackle.start(audioContext.currentTime);
+            crackle.stop(audioContext.currentTime + 0.1);
+        }, 80 + i * 60 + Math.random() * 40); // Timing ngẫu nhiên
+    }
+}
+
+// ===== COUNTDOWN BEEP SOUND =====
+function playCountdownBeep(isZero = false) {
+    if (!audioContext) return;
+    
+    const oscillator = audioContext.createOscillator();
+    const gainNode = audioContext.createGain();
+    
+    oscillator.connect(gainNode);
+    gainNode.connect(audioContext.destination);
+    
+    if (isZero) {
+        // Số 0: Tiếng "GO!" dramatic với sweep lên cao
+        oscillator.frequency.setValueAtTime(200, audioContext.currentTime); // Bắt đầu thấp
+        oscillator.frequency.exponentialRampToValueAtTime(1500, audioContext.currentTime + 0.5); // Sweep lên cao
+        gainNode.gain.setValueAtTime(0.4, audioContext.currentTime);
+        gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.6);
+        
+        oscillator.start(audioContext.currentTime);
+        oscillator.stop(audioContext.currentTime + 0.6);
+        
+        // Thêm harmonic thứ 2 (octave cao)
+        const osc2 = audioContext.createOscillator();
+        const gain2 = audioContext.createGain();
+        osc2.connect(gain2);
+        gain2.connect(audioContext.destination);
+        osc2.frequency.setValueAtTime(400, audioContext.currentTime);
+        osc2.frequency.exponentialRampToValueAtTime(3000, audioContext.currentTime + 0.4);
+        gain2.gain.setValueAtTime(0.2, audioContext.currentTime);
+        gain2.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5);
+        osc2.start(audioContext.currentTime);
+        osc2.stop(audioContext.currentTime + 0.5);
+        
+        // Thêm low rumble cho dramatic effect
+        const osc3 = audioContext.createOscillator();
+        const gain3 = audioContext.createGain();
+        osc3.connect(gain3);
+        gain3.connect(audioContext.destination);
+        osc3.frequency.setValueAtTime(100, audioContext.currentTime);
+        gain3.gain.setValueAtTime(0.3, audioContext.currentTime);
+        gain3.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.3);
+        osc3.start(audioContext.currentTime);
+        osc3.stop(audioContext.currentTime + 0.3);
+    } else {
+        // Số 10-1: Tiếng beep ngắn
+        oscillator.frequency.setValueAtTime(800, audioContext.currentTime); // G5
+        gainNode.gain.setValueAtTime(0.25, audioContext.currentTime);
+        gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.15);
+        
+        oscillator.start(audioContext.currentTime);
+        oscillator.stop(audioContext.currentTime + 0.15);
+    }
+}
+
+// ===== OPTIMIZED PARTICLE CLASS - CHI TIẾT HƠN =====
+class Particle {
+    constructor(x, y, colors, isOuter = false, type = 'inner') {
+        this.x = x;
+        this.y = y;
+        this.isOuter = isOuter;
+        this.type = type;
+        
+        const angle = Math.random() * Math.PI * 2;
+        let speed, size, decay, maxTrail;
+        
+        // Cấu hình theo từng loại particle
+        switch(type) {
+            case 'outer':  // Vòng ngoài vàng
+                speed = Math.random() * 2.5 + 5.5;
+                size = (Math.random() * 1.8 + 2.8) * scaleFactor;
+                decay = 0.003;
+                maxTrail = 14;
+                this.color = '#ffaa44';
+                break;
+                
+            case 'middle':  // Vòng giữa màu chính
+                speed = Math.random() * 2 + 4;
+                size = (Math.random() * 1.5 + 2) * scaleFactor;
+                decay = 0.0035;
+                maxTrail = 10;
+                this.color = colors[Math.floor(Math.random() * colors.length)];
+                break;
+                
+            case 'inner':  // Lõi trong
+                speed = Math.random() * 1.5 + 2.5;
+                size = (Math.random() * 1.2 + 1.5) * scaleFactor;
+                decay = 0.004;
+                maxTrail = 8;
+                this.color = colors[Math.floor(Math.random() * colors.length)];
+                break;
+                
+            case 'spark':  // Tia lửa nhỏ
+                speed = Math.random() * 3 + 6;  // Bay nhanh
+                size = (Math.random() * 0.8 + 0.8) * scaleFactor;
+                decay = 0.006;  // Chết nhanh
+                maxTrail = 6;
+                this.color = '#ffdd88';
+                break;
+                
+            case 'glitter':  // Sáng lấp lánh
+                speed = Math.random() * 1 + 1.5;  // Bay chậm
+                size = (Math.random() * 1 + 1.2) * scaleFactor;
+                decay = 0.005;
+                maxTrail = 4;
+                this.color = '#ffffee';
+                this.twinkle = true;  // Hiệu ứng nhấp nháy
+                this.twinkleSpeed = Math.random() * 0.1 + 0.05;
+                break;
+                
+            case 'mini':  // Nổ phụ
+                speed = Math.random() * 2 + 2;
+                size = (Math.random() * 1 + 1) * scaleFactor;
+                decay = 0.007;
+                maxTrail = 5;
+                this.color = colors[Math.floor(Math.random() * colors.length)];
+                break;
+                
+            default:
+                speed = Math.random() * 2 + 3;
+                size = (Math.random() * 1.5 + 1.5) * scaleFactor;
+                decay = 0.004;
+                maxTrail = 6;
+                this.color = colors[Math.floor(Math.random() * colors.length)];
+        }
+        
+        this.vx = Math.cos(angle) * speed * scaleFactor;
+        this.vy = Math.sin(angle) * speed * scaleFactor;
+        
+        this.alpha = 1;
+        this.decay = decay;
+        this.gravity = 0.05 * scaleFactor;
+        this.friction = 0.988;
+        this.size = size;
+        this.maxTrail = maxTrail;
+        
+        this.trail = [];
+        this.age = 0;
+        this.fadingColor = this.color;
+    }
+
+    update() {
+        this.age++;
+        
+        this.trail.push({ x: this.x, y: this.y });
+        if (this.trail.length > this.maxTrail) {
+            this.trail.shift();
+        }
+        
+        this.vx *= this.friction;
+        this.vy *= this.friction;
+        this.vy += this.gravity;
+        
+        this.x += this.vx;
+        this.y += this.vy;
+        
+        this.alpha -= this.decay;
+        
+        // Hiệu ứng twinkle cho glitter
+        if (this.twinkle) {
+            this.alpha = Math.max(0, this.alpha - this.decay) * (0.7 + Math.sin(this.age * this.twinkleSpeed) * 0.3);
+        }
+        
+        // Chuyển màu khi rơi (trừ spark và glitter)
+        if (this.age > 30 && this.type !== 'spark' && this.type !== 'glitter') {
+            const fadeProgress = (this.age - 30) / 60;
+            if (fadeProgress < 1) {
+                if (this.type !== 'outer') {
+                    const orangeShades = ['#ff8844', '#ff6633', '#ff4422'];
+                    const index = Math.floor(fadeProgress * 2);
+                    this.fadingColor = orangeShades[Math.min(index, orangeShades.length - 1)];
+                }
+            }
+        }
+    }
+
+    draw() {
+        // Hiệu ứng fade out đẹp - điểm sáng mờ dần
+        const isFading = this.alpha < 0.3;
+        const fadeProgress = isFading ? (this.alpha / 0.3) : 1;
+        
+        // Draw trail - dài và đẹp hơn (trừ glitter ít trail)
+        if (this.type !== 'glitter' && !isFading) {
+            for (let i = 0; i < this.trail.length - 1; i++) {
+                const t = this.trail[i];
+                const alpha = (i / this.trail.length) * this.alpha * 0.6;
+                ctx.globalAlpha = alpha;
+                
+                // Vẽ line thay vì rect cho mượt hơn
+                if (i > 0) {
+                    ctx.strokeStyle = this.fadingColor;
+                    ctx.lineWidth = this.size * 0.7;
+                    ctx.lineCap = 'round';
+                    ctx.beginPath();
+                    ctx.moveTo(this.trail[i - 1].x, this.trail[i - 1].y);
+                    ctx.lineTo(t.x, t.y);
+                    ctx.stroke();
+                }
+            }
+        }
+        
+        // Draw particle
+        ctx.globalAlpha = this.alpha;
+        
+        // Khi fade out - trở thành điểm sáng nhỏ
+        let currentSize = this.size;
+        let glowSize = (this.type === 'outer' || this.type === 'glitter') ? 3 : 2.5;
+        
+        if (isFading) {
+            // Giảm size dần xuống 20% ban đầu
+            currentSize = this.size * (0.2 + fadeProgress * 0.8);
+            // Tăng glow lên để tạo điểm sáng
+            glowSize = glowSize * (1 + (1 - fadeProgress) * 1.5);
+        }
+        
+        // Glow - mạnh hơn cho outer và glitter, có hiệu ứng fade
+        const gradient = ctx.createRadialGradient(this.x, this.y, 0, this.x, this.y, currentSize * glowSize);
+        
+        if (isFading) {
+            // Khi fade: core sáng hơn, glow rộng hơn
+            gradient.addColorStop(0, this.fadingColor);
+            gradient.addColorStop(0.3, hexToRgba(this.fadingColor, 0.7 * fadeProgress));
+            gradient.addColorStop(0.7, hexToRgba(this.fadingColor, 0.3 * fadeProgress));
+            gradient.addColorStop(1, 'rgba(0, 0, 0, 0)');
+        } else {
+            gradient.addColorStop(0, this.fadingColor);
+            gradient.addColorStop(0.5, hexToRgba(this.fadingColor, 0.5));
+            gradient.addColorStop(1, 'rgba(0, 0, 0, 0)');
+        }
+        
+        ctx.fillStyle = gradient;
+        ctx.fillRect(this.x - currentSize * glowSize, this.y - currentSize * glowSize, currentSize * glowSize * 2, currentSize * glowSize * 2);
+        
+        // Core - sáng hơn, glitter có shadow mạnh hơn
+        // Khi fade out - core sáng hơn và blur mạnh hơn
+        const shadowBlur = this.type === 'glitter' ? 12 : 8;
+        ctx.shadowBlur = isFading ? shadowBlur * (1.5 + (1 - fadeProgress)) : shadowBlur;
+        ctx.shadowColor = this.fadingColor;
+        ctx.fillStyle = this.fadingColor;
+        ctx.fillRect(this.x - currentSize * 0.5, this.y - currentSize * 0.5, currentSize, currentSize);
+        ctx.shadowBlur = 0;
+    }
+}
+
+// ===== ROCKET CLASS =====
+class Rocket {
+    constructor(x, y, targetY, colors) {
+        this.x = x;
+        this.y = y;
+        this.targetY = targetY;
+        this.colors = colors;
+        this.vx = (Math.random() - 0.5) * 2;
+        this.vy = -9.5; // Tăng cao hơn nữa - bay rất cao
+        this.exploded = false;
+        this.trail = [];
+    }
+
+    update() {
+        this.trail.push({ x: this.x, y: this.y });
+        if (this.trail.length > 10) {
+            this.trail.shift();
+        }
+
+        this.x += this.vx;
+        this.y += this.vy;
+        this.vy += 0.08; // Giảm gia tốc - bay chậm hơn
+
+        if (this.y <= this.targetY || this.vy >= 0) {
+            this.exploded = true;
+        }
+    }
+
+    draw() {
+        for (let i = 0; i < this.trail.length; i++) {
+            const t = this.trail[i];
+            const alpha = (i / this.trail.length) * 0.5;
+            ctx.globalAlpha = alpha;
+            ctx.fillStyle = '#ffaa44';
+            ctx.fillRect(t.x - 1, t.y - 1, 2, 2);
+        }
+
+        ctx.globalAlpha = 1;
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(this.x - 2, this.y - 2, 4, 4);
+    }
+}
+
+// Arrays
+const rockets = [];
+const particles = [];
+
+// Color sets - chỉ màu đẹp: vàng cam, đỏ cam, trắng sáng
+const colorSets = [
+    ['#ffaa00', '#ff8800', '#ffcc44'],  // Vàng cam
+    ['#ff4422', '#ff3300', '#ff6633'],  // Đỏ cam
+    ['#ffffff', '#ffffee', '#ffffcc'],  // Trắng sáng (trăng)
+];
+
+// Create explosion - chi tiết hơn với nhiều lớp
+function createExplosion(x, y, colors) {
+    // Điều chỉnh số lượng particles cho mobile - TĂNG ĐỘ CHI TIẾT
+    let baseMultiplier;
+    if (window.innerWidth < 480) {
+        baseMultiplier = 0.7;  // Mobile nhỏ
+    } else if (window.innerWidth < 768) {
+        baseMultiplier = 0.85;  // Mobile lớn/Tablet
+    } else {
+        baseMultiplier = 1;  // Desktop
+    }
+    
+    // === LỚP 1: Outer Ring - Vòng ngoài vàng đậm ===
+    const outerCount = Math.floor(35 * baseMultiplier);
+    for (let i = 0; i < outerCount; i++) {
+        particles.push(new Particle(x, y, colors, true, 'outer'));
+    }
+    
+    // === LỚP 2: Middle Ring - Vòng giữa màu chính ===
+    const middleCount = Math.floor(50 * baseMultiplier);
+    for (let i = 0; i < middleCount; i++) {
+        particles.push(new Particle(x, y, colors, false, 'middle'));
+    }
+    
+    // === LỚP 3: Inner Core - Lõi trong sáng ===
+    const innerCount = Math.floor(40 * baseMultiplier);
+    for (let i = 0; i < innerCount; i++) {
+        particles.push(new Particle(x, y, colors, false, 'inner'));
+    }
+    
+    // === LỚP 4: Sparks - Tia lửa nhỏ li ti ===
+    const sparksCount = Math.floor(60 * baseMultiplier);
+    for (let i = 0; i < sparksCount; i++) {
+        particles.push(new Particle(x, y, colors, false, 'spark'));
+    }
+    
+    // === LỚP 5: Glitter - Sáng lấp lánh ===
+    const glitterCount = Math.floor(30 * baseMultiplier);
+    for (let i = 0; i < glitterCount; i++) {
+        particles.push(new Particle(x, y, colors, false, 'glitter'));
+    }
+    
+    // Secondary mini explosions (nổ nhỏ theo sau)
+    setTimeout(() => {
+        const miniCount = Math.floor(3 * baseMultiplier);
+        for (let i = 0; i < miniCount; i++) {
+            const offset = 30 + Math.random() * 50;
+            const angle = Math.random() * Math.PI * 2;
+            const mx = x + Math.cos(angle) * offset;
+            const my = y + Math.sin(angle) * offset;
+            
+            for (let j = 0; j < Math.floor(15 * baseMultiplier); j++) {
+                particles.push(new Particle(mx, my, colors, false, 'mini'));
+            }
+        }
+    }, 200);
+    
+    playExplosionSound();
+}
+
+// Launch rocket
+function launchRocket() {
+    const x = Math.random() * canvas.width;
+    const y = canvas.height;
+    
+    // Điều chỉnh vùng nổ theo màn hình - CAO HƠN
+    let minY, maxY;
+    if (window.innerWidth < 768) {
+        // Mobile: nổ cao hơn - 10%-35% màn hình từ trên xuống
+        minY = canvas.height * 0.10;
+        maxY = canvas.height * 0.35;
+    } else {
+        // Desktop: nổ tại 15%-50%
+        minY = canvas.height * 0.15;
+        maxY = canvas.height * 0.50;
+    }
+    
+    const targetY = Math.random() * (maxY - minY) + minY;
+    const colors = colorSets[Math.floor(Math.random() * colorSets.length)];
+    
+    rockets.push(new Rocket(x, y, targetY, colors));
+}
+
+// Animation loop
+let lastTime = 0;
+function animate(currentTime) {
+    const deltaTime = currentTime - lastTime;
+    lastTime = currentTime;
+    
+    // Clear with fade
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.1)';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    
+    // Update and draw rockets
+    for (let i = rockets.length - 1; i >= 0; i--) {
+        rockets[i].update();
+        rockets[i].draw();
+
+        if (rockets[i].exploded) {
+            createExplosion(rockets[i].x, rockets[i].y, rockets[i].colors);
+            rockets.splice(i, 1);
+        }
+    }
+
+    // Update and draw particles
+    for (let i = particles.length - 1; i >= 0; i--) {
+        particles[i].update();
+        particles[i].draw();
+
+        if (particles[i].alpha <= 0 || particles[i].y > canvas.height) {
+            particles.splice(i, 1);
+        }
+    }
+    
+    ctx.globalAlpha = 1;
+    requestAnimationFrame(animate);
+}
+
+// Auto launch - chậm và ít để thưởng thức
+function autoLaunch() {
+    const numRockets = Math.random() > 0.9 ? 2 : 1;  // 90% là 1 pháo, 10% là 2
+    
+    for (let i = 0; i < numRockets; i++) {
+        setTimeout(() => {
+            launchRocket();
+        }, i * 400);  // Tăng khoảng cách giữa các pháo trong 1 đợt
+    }
+    
+    const delay = Math.random() * 1500 + 1500;  // 1500-3000ms giữa các đợt (chậm hơn)
+    setTimeout(autoLaunch, delay);
+}
+
+// Click/Touch to launch
+function handleInteraction(x, y) {
+    initAudioContext();
+    
+    const targetY = y;
+    const colors = colorSets[Math.floor(Math.random() * colorSets.length)];
+    
+    rockets.push(new Rocket(x, canvas.height, targetY, colors));
+}
+
+canvas.addEventListener('click', (e) => {
+    handleInteraction(e.clientX, e.clientY);
+});
+
+canvas.addEventListener('touchstart', (e) => {
+    e.preventDefault();
+    const touch = e.touches[0];
+    handleInteraction(touch.clientX, touch.clientY);
+});
+
+// Start animation loop
+animate(0);
+
+// ===== COUNTDOWN LOGIC =====
+let hasStarted = false;
+let countdownValue = 5;
+// ===== DOM ELEMENTS =====
+const countdownContainer = document.getElementById('countdown-container');
+const countdownNumber = document.getElementById('countdown-number');
+const newyearText = document.getElementById('newyear-text');
+// const photoContainer = document.getElementById('photo-container'); // Tạm comment, sẽ dùng lại cho kịch bản lời chúc mới
+
+// ===== COUNTDOWN FUNCTION =====
+function startCountdown() {
+    if (hasStarted) return;
+    hasStarted = true;
+    initAudioContext();
+    
+    // Show countdown container
+    countdownContainer.style.display = 'block';
+    countdownContainer.style.opacity = '1';
+    countdownNumber.textContent = countdownValue;
+    
+    // Play beep for number 10
+    playCountdownBeep();
+    
+    // Start counting down
+    const countdownInterval = setInterval(() => {
+            countdownValue--;
+            
+            if (countdownValue > 0) {
+                countdownNumber.textContent = countdownValue;
+                
+                // Play beep for each number
+                playCountdownBeep();
+                
+                // Animation pulse khi đếm
+                countdownNumber.style.animation = 'none';
+                setTimeout(() => {
+                    countdownNumber.style.animation = 'countdownPulse 1s ease-in-out';
+                }, 10);
+                
+            } else if (countdownValue === 0) {
+                // Số 0
+                countdownNumber.textContent = '0';
+                
+                // Play celebratory beep for 0
+                playCountdownBeep(true);
+                
+                setTimeout(() => {
+                    // Ẩn countdown
+                    countdownContainer.style.transition = 'opacity 0.5s';
+                    countdownContainer.style.opacity = '0';
+                
+                setTimeout(() => {
+                    countdownContainer.style.display = 'none';
+                    
+                    // Hiện text Happy New Year
+                    newyearText.style.display = 'block';
+                    newyearText.style.opacity = '0';
+                    newyearText.style.transition = 'opacity 1s';
+                    setTimeout(() => {
+                        newyearText.style.opacity = '1';
+                    }, 50);
+                    
+                    // BẮT ĐẦU PHÁO HOA RẦM RỘ!
+                    for (let i = 0; i < 5; i++) {
+                        setTimeout(() => {
+                            launchRocket();
+                        }, i * 300);
+                    }
+                    
+                    // Auto launch sau đó
+                    setTimeout(() => {
+                        autoLaunch();
+                    }, 2000);
+                    
+                    // Sau 3s: Ẩn text "Happy New Year"
+                    setTimeout(() => {
+                        newyearText.style.transition = 'opacity 1s';
+                        newyearText.style.opacity = '0';
+                        
+                        setTimeout(() => {
+                            newyearText.style.display = 'none';
+                            
+                            // TODO: Thêm kịch bản lời chúc ở đây
+                        }, 1000);
+                    }, 3000);
+                    
+                }, 500);
+            }, 1000);
+            
+            clearInterval(countdownInterval);
+        }
+    }, 1000);
+}
+
+// ===== START PHOTO HANDLER =====
+const startOverlay = document.getElementById('start-overlay');
+const startPhoto = document.getElementById('start-photo');
+
+if (startPhoto) {
+    startPhoto.addEventListener('click', () => {
+        // Enable audio
+        initAudioContext();
+        if (audioContext) {
+            audioContext.resume().then(() => {
+                console.log('Audio enabled');
+            }).catch(e => {
+                console.log('Audio resume failed:', e);
+            });
+        }
+        
+        // Hide overlay
+        startOverlay.classList.add('hidden');
+        
+        // Start countdown after short delay
+        setTimeout(() => {
+            startCountdown();
+        }, 500);
+    });
+}

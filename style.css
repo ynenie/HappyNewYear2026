@@ -1,0 +1,1124 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+/* ===== START OVERLAY ===== */
+#start-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: 
+        radial-gradient(circle at 15% 20%, rgba(255, 0, 0, 0.25) 0%, transparent 40%),
+        radial-gradient(circle at 85% 30%, rgba(255, 215, 0, 0.2) 0%, transparent 40%),
+        radial-gradient(circle at 10% 80%, rgba(212, 175, 55, 0.25) 0%, transparent 40%),
+        radial-gradient(circle at 90% 70%, rgba(255, 0, 0, 0.2) 0%, transparent 40%),
+        radial-gradient(ellipse at 50% 50%, rgba(139, 0, 0, 0.15) 0%, transparent 60%),
+        linear-gradient(135deg, 
+            #1a0f0f 0%, 
+            #2d1616 20%, 
+            #3d1a1a 40%, 
+            #2d1616 60%, 
+            #1a0f0f 80%, 
+            #0f0808 100%
+        );
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10000;
+    opacity: 1;
+    transition: opacity 0.8s ease;
+    overflow: hidden;
+}
+
+#start-overlay::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: 
+        repeating-linear-gradient(
+            90deg,
+            transparent,
+            transparent 40px,
+            rgba(212, 175, 55, 0.03) 40px,
+            rgba(212, 175, 55, 0.03) 41px
+        ),
+        repeating-linear-gradient(
+            0deg,
+            transparent,
+            transparent 40px,
+            rgba(255, 0, 0, 0.02) 40px,
+            rgba(255, 0, 0, 0.02) 41px
+        );
+    pointer-events: none;
+}
+
+#start-overlay.hidden {
+    opacity: 0;
+    pointer-events: none;
+}
+
+.photo-container {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 35px;
+    padding: 20px;
+    z-index: 2;
+}
+
+/* Tet Year Badge */
+.tet-year-badge {
+    position: absolute;
+    top: -60px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-family: 'Playfair Display', serif;
+    font-size: 1.6rem;
+    font-weight: 700;
+    color: #ffd700;
+    background: linear-gradient(135deg, rgba(139, 0, 0, 0.9) 0%, rgba(180, 0, 0, 0.95) 100%);
+    padding: 10px 35px;
+    border-radius: 50px;
+    border: 2px solid rgba(255, 215, 0, 0.7);
+    box-shadow: 
+        0 0 20px rgba(255, 215, 0, 0.5),
+        0 0 40px rgba(255, 0, 0, 0.3),
+        inset 0 0 20px rgba(255, 215, 0, 0.1);
+    text-shadow: 
+        0 0 10px rgba(255, 215, 0, 0.8),
+        0 2px 5px rgba(0, 0, 0, 0.5);
+    animation: badgePulse 2s ease-in-out infinite, fadeInBadge 1.5s ease-out forwards;
+    opacity: 0;
+    z-index: 10;
+    white-space: nowrap;
+}
+
+@keyframes fadeInBadge {
+    0% {
+        opacity: 0;
+        transform: translateX(-50%) scale(0.8);
+    }
+    100% {
+        opacity: 1;
+        transform: translateX(-50%) scale(1);
+    }
+}
+
+@keyframes badgePulse {
+    0%, 100% {
+        box-shadow: 
+            0 0 20px rgba(255, 215, 0, 0.5),
+            0 0 40px rgba(255, 0, 0, 0.3),
+            inset 0 0 20px rgba(255, 215, 0, 0.1);
+    }
+    50% {
+        box-shadow: 
+            0 0 30px rgba(255, 215, 0, 0.7),
+            0 0 60px rgba(255, 0, 0, 0.5),
+            inset 0 0 30px rgba(255, 215, 0, 0.2);
+    }
+}
+
+/* Tet Greeting at Bottom */
+.tet-greeting {
+    position: fixed;
+    bottom: 6%;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    z-index: 2;
+    animation: greetingFadeIn 2s ease-out 1s forwards;
+    opacity: 0;
+    max-width: 90%;
+    text-align: center;
+}
+
+.greeting-line {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: #ffd700;
+    background: linear-gradient(90deg, 
+        #ffd700 0%, 
+        #ffed4e 25%, 
+        #ff8c00 50%, 
+        #ffed4e 75%, 
+        #ffd700 100%
+    );
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    text-shadow: 
+        0 0 20px rgba(255, 215, 0, 0.8),
+        0 0 40px rgba(255, 140, 0, 0.5);
+    filter: drop-shadow(0 2px 10px rgba(0, 0, 0, 0.5));
+    animation: greetingGlow 3s ease-in-out infinite;
+    line-height: 1.2;
+}
+
+.greeting-subtitle {
+    font-family: 'Poppins', sans-serif;
+    font-size: 0.95rem;
+    font-weight: 400;
+    color: rgba(255, 215, 0, 0.9);
+    letter-spacing: 2.5px;
+    text-shadow: 
+        0 0 10px rgba(255, 215, 0, 0.6),
+        0 2px 5px rgba(0, 0, 0, 0.5);
+    line-height: 1.4;
+}
+
+@keyframes greetingFadeIn {
+    0% {
+        opacity: 0;
+        transform: translateX(-50%) translateY(20px);
+    }
+    100% {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0);
+    }
+}
+
+@keyframes greetingGlow {
+    0%, 100% {
+        filter: drop-shadow(0 2px 10px rgba(0, 0, 0, 0.5))
+                drop-shadow(0 0 20px rgba(255, 215, 0, 0.8));
+    }
+    50% {
+        filter: drop-shadow(0 2px 10px rgba(0, 0, 0, 0.5))
+                drop-shadow(0 0 40px rgba(255, 215, 0, 1))
+                drop-shadow(0 0 60px rgba(255, 140, 0, 0.7));
+    }
+}
+
+/* Elegant Photo Frame */
+.start-photo {
+    max-width: 400px;
+    max-height: 480px;
+    width: auto;
+    height: auto;
+    border-radius: 30px;
+    cursor: pointer;
+    position: relative;
+    z-index: 2;
+    
+    /* Luxury Tet frame effect with gold and red */
+    box-shadow: 
+        0 0 0 1px rgba(255, 255, 255, 0.15),
+        0 0 0 8px rgba(255, 215, 0, 0.1),
+        0 0 0 9px rgba(212, 175, 55, 0.5),
+        0 0 0 16px rgba(139, 0, 0, 0.2),
+        0 0 0 17px rgba(255, 215, 0, 0.3),
+        0 30px 80px rgba(0, 0, 0, 0.6),
+        0 0 60px rgba(255, 215, 0, 0.1),
+        inset 0 0 50px rgba(255, 215, 0, 0.08);
+    
+    transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    
+    /* Animation: fade in from blur */
+    animation: fadeInFromBlur 2.5s ease-out forwards;
+    filter: blur(20px);
+    opacity: 0;
+}
+
+@keyframes fadeInFromBlur {
+    0% {
+        filter: blur(20px) brightness(0.8);
+        opacity: 0;
+        transform: scale(0.92) translateY(20px);
+    }
+    100% {
+        filter: blur(0) brightness(1);
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
+}
+
+.start-photo:hover {
+    transform: translateY(-8px) scale(1.02);
+    box-shadow: 
+        0 0 0 1px rgba(255, 255, 255, 0.25),
+        0 0 0 8px rgba(255, 215, 0, 0.2),
+        0 0 0 9px rgba(212, 175, 55, 0.7),
+        0 0 0 16px rgba(139, 0, 0, 0.3),
+        0 0 0 17px rgba(255, 215, 0, 0.5),
+        0 40px 100px rgba(255, 215, 0, 0.3),
+        0 0 80px rgba(255, 140, 0, 0.4),
+        inset 0 0 80px rgba(255, 215, 0, 0.12);
+}
+
+.start-photo:active {
+    transform: translateY(-4px) scale(1);
+}
+
+/* Elegant Peach Blossom Decorations */
+.blossom-decor {
+    position: absolute;
+    font-size: 4.5rem;
+    z-index: 3;
+    animation: blossomFloat 4s ease-in-out infinite;
+    pointer-events: none;
+    opacity: 0;
+    animation: blossomFadeIn 2s ease-out forwards, blossomFloat 4s ease-in-out 2s infinite;
+}
+
+.blossom-decor::before {
+    content: '🌸';
+    display: block;
+    filter: 
+        drop-shadow(0 0 15px rgba(255, 192, 203, 0.8))
+        drop-shadow(0 0 25px rgba(255, 192, 203, 0.4));
+}
+
+.blossom-decor.top-left {
+    top: -35px;
+    left: -35px;
+    animation-delay: 0.3s, 2.3s;
+}
+
+.blossom-decor.top-right {
+    top: -35px;
+    right: -35px;
+    animation-delay: 0.6s, 2.6s;
+    transform: scaleX(-1);
+}
+
+.blossom-decor.bottom-left {
+    bottom: 60px;
+    left: -35px;
+    animation-delay: 0.9s, 2.9s;
+}
+
+.blossom-decor.bottom-right {
+    bottom: 60px;
+    right: -35px;
+    animation-delay: 1.2s, 3.2s;
+    transform: scaleX(-1);
+}
+
+@keyframes blossomFadeIn {
+    0% {
+        opacity: 0;
+        transform: scale(0.5) rotate(-30deg);
+    }
+    100% {
+        opacity: 1;
+        transform: scale(1) rotate(0deg);
+    }
+}
+
+@keyframes blossomFloat {
+    0%, 100% {
+        transform: translateY(0) rotate(0deg);
+    }
+    25% {
+        transform: translateY(-12px) rotate(3deg);
+    }
+    50% {
+        transform: translateY(-8px) rotate(-2deg);
+    }
+    75% {
+        transform: translateY(-15px) rotate(4deg);
+    }
+}
+
+/* Elegant Hint Text */
+.hint-text {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.3rem;
+    font-weight: 600;
+    font-style: italic;
+    color: #ffd700;
+    text-align: center;
+    margin: 0;
+    padding: 12px 28px;
+    animation: hintPulse 2.5s ease-in-out infinite, fadeInHint 3s ease-out forwards;
+    opacity: 0;
+    letter-spacing: 2px;
+    position: relative;
+    
+    background: linear-gradient(
+        90deg,
+        rgba(139, 0, 0, 0.6) 0%,
+        rgba(180, 0, 0, 0.7) 50%,
+        rgba(139, 0, 0, 0.6) 100%
+    );
+    border-radius: 50px;
+    border: 1px solid rgba(255, 215, 0, 0.5);
+    
+    text-shadow: 
+        0 0 20px rgba(255, 215, 0, 0.9),
+        0 0 40px rgba(255, 140, 0, 0.5),
+        0 2px 10px rgba(0, 0, 0, 0.5);
+        
+    box-shadow: 
+        0 4px 20px rgba(255, 215, 0, 0.3),
+        0 0 40px rgba(255, 0, 0, 0.2),
+        inset 0 0 30px rgba(255, 215, 0, 0.1);
+}
+
+@keyframes fadeInHint {
+    0% {
+        opacity: 0;
+        transform: translateY(15px) scale(0.95);
+    }
+    80% {
+        opacity: 0;
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+@keyframes hintPulse {
+    0%, 100% {
+        text-shadow: 
+            0 0 20px rgba(255, 215, 0, 0.9),
+            0 0 40px rgba(255, 140, 0, 0.5),
+            0 2px 10px rgba(0, 0, 0, 0.5);
+        box-shadow: 
+            0 4px 20px rgba(255, 215, 0, 0.3),
+            0 0 40px rgba(255, 0, 0, 0.2),
+            inset 0 0 30px rgba(255, 215, 0, 0.1);
+    }
+    50% {
+        text-shadow: 
+            0 0 30px rgba(255, 215, 0, 1),
+            0 0 60px rgba(255, 140, 0, 0.8),
+            0 2px 10px rgba(0, 0, 0, 0.5);
+        box-shadow: 
+            0 6px 30px rgba(255, 215, 0, 0.5),
+            0 0 60px rgba(255, 0, 0, 0.4),
+            inset 0 0 40px rgba(255, 215, 0, 0.2);
+    }
+}
+
+/* Tet Lantern Decorations */
+.tet-decoration.lantern {
+    position: fixed;
+    top: 5%;
+    font-size: 4rem;
+    z-index: 1;
+    pointer-events: none;
+    animation: lanternSwing 3s ease-in-out infinite, lanternFadeIn 1.5s ease-out forwards;
+    opacity: 0;
+    transform-origin: top center;
+}
+
+.tet-decoration.lantern::before {
+    content: '🏮';
+    display: block;
+    filter: 
+        drop-shadow(0 0 20px rgba(255, 0, 0, 0.6))
+        drop-shadow(0 0 40px rgba(255, 215, 0, 0.3));
+}
+
+.tet-decoration.lantern.left {
+    left: 8%;
+    animation-delay: 0s, 0s;
+}
+
+.tet-decoration.lantern.right {
+    right: 8%;
+    animation-delay: 0.5s, 0.2s;
+}
+
+@keyframes lanternSwing {
+    0%, 100% {
+        transform: rotate(-3deg);
+    }
+    50% {
+        transform: rotate(3deg);
+    }
+}
+
+@keyframes lanternFadeIn {
+    0% {
+        opacity: 0;
+        transform: translateY(-30px) rotate(0deg);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0) rotate(-3deg);
+    }
+}
+
+@media (max-width: 768px) {
+    .start-photo {
+        max-width: 85vw;
+        max-height: 48vh;
+        border-radius: 20px;
+    }
+    
+    .blossom-decor {
+        font-size: 2.5rem;
+    }
+    
+    .blossom-decor.top-left,
+    .blossom-decor.top-right {
+        top: -15px;
+    }
+    
+    .blossom-decor.bottom-left,
+    .blossom-decor.bottom-right {
+        bottom: 45px;
+    }
+    
+    .blossom-decor.top-left,
+    .blossom-decor.bottom-left {
+        left: -15px;
+    }
+    
+    .blossom-decor.top-right,
+    .blossom-decor.bottom-right {
+        right: -15px;
+    }
+    
+    .hint-text {
+        font-size: 0.95rem;
+        padding: 10px 20px;
+        letter-spacing: 1px;
+        border-radius: 30px;
+    }
+    
+    .photo-container {
+        gap: 22px;
+        padding: 10px;
+    }
+    
+    .tet-decoration.lantern {
+        font-size: 2.5rem;
+        top: 3%;
+    }
+    
+    .tet-decoration.lantern.left {
+        left: 5%;
+    }
+    
+    .tet-decoration.lantern.right {
+        right: 5%;
+    }
+    
+    .tet-year-badge {
+        font-size: 1.2rem;
+        padding: 8px 22px;
+        top: -50px;
+    }
+    
+    .tet-greeting {
+        bottom: 4%;
+    }
+    
+    .greeting-line {
+        font-size: 1.3rem;
+    }
+    
+    .greeting-subtitle {
+        font-size: 0.75rem;
+        letter-spacing: 2px;
+    }
+}
+
+/* Extra small mobile phones */
+@media (max-width: 480px) {
+    .start-photo {
+        max-width: 85vw;
+        max-height: 45vh;
+        border-radius: 18px;
+    }
+    
+    .blossom-decor {
+        font-size: 2rem;
+    }
+    
+    .blossom-decor.top-left,
+    .blossom-decor.top-right {
+        top: -12px;
+    }
+    
+    .blossom-decor.bottom-left,
+    .blossom-decor.bottom-right {
+        bottom: 40px;
+    }
+    
+    .blossom-decor.top-left,
+    .blossom-decor.bottom-left {
+        left: -12px;
+    }
+    
+    .blossom-decor.top-right,
+    .blossom-decor.bottom-right {
+        right: -12px;
+    }
+    
+    .hint-text {
+        font-size: 0.85rem;
+        padding: 8px 16px;
+        letter-spacing: 0.5px;
+    }
+    
+    .photo-container {
+        gap: 18px;
+    }
+    
+    .tet-decoration.lantern {
+        font-size: 2rem;
+        top: 2%;
+    }
+    
+    .tet-decoration.lantern.left {
+        left: 3%;
+    }
+    
+    .tet-decoration.lantern.right {
+        right: 3%;
+    }
+    
+    .tet-year-badge {
+        font-size: 1rem;
+        padding: 6px 18px;
+        top: -40px;
+    }
+    
+    .tet-greeting {
+        bottom: 3%;
+    }
+    
+    .greeting-line {
+        font-size: 1rem;
+    }
+    
+    .greeting-subtitle {
+        font-size: 0.65rem;
+        letter-spacing: 1.5px;
+    }
+}
+
+body {
+    overflow: hidden;
+    background: #000000;
+    font-family: 'Arial', sans-serif;
+    touch-action: none;
+    -webkit-user-select: none;
+    user-select: none;
+    position: relative;
+}
+
+#fireworks {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+    touch-action: none;
+}
+
+/* ===== COUNTDOWN STYLES ===== */
+#countdown-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 200;
+    pointer-events: none;
+    
+    /* Background gradient Tết */
+    background: 
+        radial-gradient(ellipse at center, rgba(139, 0, 0, 0.3) 0%, transparent 60%),
+        radial-gradient(ellipse at 20% 30%, rgba(212, 175, 55, 0.15) 0%, transparent 50%),
+        radial-gradient(ellipse at 80% 70%, rgba(212, 175, 55, 0.15) 0%, transparent 50%),
+        linear-gradient(135deg, #0a0008 0%, #1a0510 50%, #0a0008 100%);
+}
+
+#countdown-number {
+    font-family: 'Playfair Display', serif;
+    font-size: 28rem;
+    font-weight: 900;
+    line-height: 1;
+    margin: 0;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 2;
+    
+    /* Gradient vàng-đỏ Tết */
+    background: linear-gradient(180deg, 
+        #ffffff 0%,
+        #ffd700 20%,
+        #ffaa00 40%,
+        #ff6600 60%,
+        #d32f2f 80%,
+        #8b0000 100%
+    );
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    
+    /* Glow effect tinh tế */
+    filter: drop-shadow(0 0 40px rgba(255, 215, 0, 0.8))
+            drop-shadow(0 0 80px rgba(255, 170, 0, 0.6))
+            drop-shadow(0 10px 60px rgba(0, 0, 0, 0.8));
+    
+    animation: countdownPulse 1s ease-in-out;
+    
+    /* Viền mỏng */
+    text-shadow: 
+        0 0 2px rgba(255, 255, 255, 0.8),
+        0 0 10px rgba(255, 215, 0, 0.6);
+}
+
+@keyframes countdownPulse {
+    0% {
+        transform: translate(-50%, -50%) scale(0.85);
+        opacity: 0;
+        filter: drop-shadow(0 0 20px rgba(255, 215, 0, 0.4))
+                drop-shadow(0 0 40px rgba(255, 170, 0, 0.3))
+                drop-shadow(0 5px 30px rgba(0, 0, 0, 0.6));
+    }
+    50% {
+        transform: translate(-50%, -50%) scale(1.08);
+        opacity: 1;
+        filter: drop-shadow(0 0 60px rgba(255, 215, 0, 1))
+                drop-shadow(0 0 120px rgba(255, 170, 0, 0.8))
+                drop-shadow(0 15px 80px rgba(0, 0, 0, 0.9));
+    }
+    100% {
+        transform: translate(-50%, -50%) scale(1);
+        opacity: 1;
+        filter: drop-shadow(0 0 40px rgba(255, 215, 0, 0.8))
+                drop-shadow(0 0 80px rgba(255, 170, 0, 0.6))
+                drop-shadow(0 10px 60px rgba(0, 0, 0, 0.8));
+    }
+}
+
+/* ===== HAPPY NEW YEAR TEXT ===== */
+#newyear-text {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+    z-index: 200;
+    pointer-events: none;
+}
+
+.big-text {
+    font-size: 6rem;
+    font-weight: 900;
+    color: #fff;
+    text-shadow: 
+        0 0 20px #fff,
+        0 0 40px #ffd700,
+        0 0 60px #ff8800,
+        0 0 80px #ff8800,
+        0 0 100px #ff8800;
+    animation: bigTextGlow 1s ease-in-out infinite alternate;
+    margin-bottom: 30px;
+    letter-spacing: 8px;
+}
+
+.year-text {
+    font-size: 4rem;
+    font-weight: bold;
+    color: #ffd700;
+    text-shadow: 
+        0 0 20px #ffd700,
+        0 0 40px #ffd700,
+        0 0 60px #ff8800;
+    animation: pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes bigTextGlow {
+    from {
+        text-shadow: 
+            0 0 20px #fff,
+            0 0 40px #ffd700,
+            0 0 60px #ff8800;
+    }
+    to {
+        text-shadow: 
+            0 0 30px #fff,
+            0 0 60px #ffd700,
+            0 0 90px #ff8800,
+            0 0 120px #ff8800;
+    }
+}
+
+.message {
+    position: fixed;
+    top: 55%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+    z-index: 100;
+    pointer-events: none;
+    background: rgba(0, 0, 0, 0.6);
+    padding: 30px 50px;
+    border-radius: 30px;
+    backdrop-filter: blur(10px);
+    border: 2px solid rgba(255, 255, 255, 0.1);
+}
+
+.title {
+    font-size: 3rem;
+    font-weight: bold;
+    color: #fff;
+    text-shadow: 
+        0 0 10px #fff,
+        0 0 20px #fff,
+        0 0 30px #ff00de,
+        0 0 40px #ff00de;
+    animation: glow 2s ease-in-out infinite alternate;
+    margin-bottom: 15px;
+    letter-spacing: 3px;
+}
+
+.subtitle {
+    font-size: 1.5rem;
+    color: #ffd700;
+    text-shadow: 
+        0 0 10px #ffd700,
+        0 0 20px #ffd700;
+    animation: pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes glow {
+    from {
+        text-shadow: 
+            0 0 10px #fff,
+            0 0 20px #fff,
+            0 0 30px #ff00de,
+            0 0 40px #ff00de;
+    }
+    to {
+        text-shadow: 
+            0 0 20px #fff,
+            0 0 30px #ff00de,
+            0 0 40px #ff00de,
+            0 0 50px #ff00de,
+            0 0 60px #ff00de;
+    }
+}
+
+@keyframes pulse {
+    0%, 100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+    50% {
+        transform: scale(1.05);
+        opacity: 0.8;
+    }
+}
+
+
+/* Ảnh cô ấy với khung đẹp */
+.photo-container {
+    position: fixed;
+    top: 12%;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 100;
+    text-align: center;
+    animation: fadeInDown 2s ease-out;
+}
+
+.heart-frame {
+    width: 140px;
+    height: 140px;
+    margin: 0 auto 12px;
+    position: relative;
+    animation: heartbeat 2s ease-in-out infinite;
+}
+
+.her-photo {
+    width: 130px;
+    height: 130px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 4px solid #ff1493;
+    box-shadow: 
+        0 0 20px #ff1493,
+        0 0 40px #ff1493,
+        0 0 60px #ff69b4;
+    display: block;
+}
+
+.special-message {
+    font-size: 1.1rem;
+    font-weight: bold;
+    color: #ff69b4;
+    text-shadow: 
+        0 0 10px #ff69b4,
+        0 0 20px #ff69b4;
+    background: rgba(0, 0, 0, 0.7);
+    padding: 8px 20px;
+    border-radius: 20px;
+    display: inline-block;
+    border: 1px solid rgba(255, 20, 147, 0.3);
+}
+
+@keyframes heartbeat {
+    0%, 100% { 
+        transform: scale(1);
+    }
+    50% { 
+        transform: scale(1.08);
+    }
+}
+
+@keyframes fadeInDown {
+    from {
+        opacity: 0;
+        transform: translate(-50%, -80px);
+    }
+    to {
+        opacity: 1;
+        transform: translate(-50%, 0);
+    }
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+    /* Landing Page - Tablet */
+    .scroll-container {
+        width: 95%;
+    }
+    
+    .scroll-left .scroll-content,
+    .scroll-right .scroll-content {
+        font-size: 1.4rem;
+        padding: 38px 18px;
+        gap: 8px;
+        width: 90px;
+    }
+    
+    .center-content {
+        padding: 30px 25px;
+        gap: 25px;
+    }
+    
+    .frame-top {
+        font-size: 1.6rem;
+        letter-spacing: 1.5px;
+    }
+    
+    .photo-frame {
+        width: 220px;
+        height: 270px;
+    }
+    
+    .start-btn {
+        font-size: 1.15rem;
+    }
+    .btn-content {
+        padding: 14px 36px;
+        gap: 9px;
+    }
+    .btn-icon {
+        font-size: 1.3rem;
+    }
+    
+    /* Countdown - Tablet */
+    #countdown-number {
+        font-size: 22rem;
+    }
+    
+    /* Photo Container */
+    .photo-container {
+        top: 5%;
+    }
+    .heart-frame {
+        width: 130px;
+        height: 130px;
+    }
+    .her-photo {
+        width: 120px;
+        height: 120px;
+    }
+    .special-message {
+        font-size: 1.1rem;
+        padding: 6px 16px;
+    }
+    .message {
+        padding: 25px 40px;
+    }
+    .title {
+        font-size: 2.5rem;
+        letter-spacing: 2px;
+    }
+    .subtitle {
+        font-size: 1.3rem;
+    }
+}
+
+@media (max-width: 480px) {
+    /* Landing Page - Mobile */
+    .scroll-container {
+        width: 98%;
+    }
+    
+    .scroll-left .scroll-content,
+    .scroll-right .scroll-content {
+        font-size: 1.1rem;
+        padding: 32px 12px;
+        gap: 5px;
+        width: 68px;
+    }
+    
+    .center-content {
+        padding: 25px 18px;
+        gap: 20px;
+    }
+    
+    .frame-top {
+        font-size: 1.15rem;
+        letter-spacing: 0.5px;
+    }
+    
+    .photo-frame {
+        width: 180px;
+        height: 230px;
+        border-width: 3px;
+    }
+    
+    .start-btn {
+        font-size: 1.1rem;
+    }
+    .btn-content {
+        padding: 13px 32px;
+        gap: 8px;
+    }
+    .btn-icon {
+        font-size: 1.2rem;
+    }
+    
+    /* Countdown - Mobile */
+    #countdown-number {
+        font-size: 18rem;
+    }
+    
+    /* Happy New Year - Mobile */
+    .big-text {
+        font-size: 3.5rem;
+        letter-spacing: 4px;
+        margin-bottom: 20px;
+    }
+    .year-text {
+        font-size: 2.8rem;
+    }
+    
+    /* Photo Container - Mobile */
+    .photo-container {
+        top: 5%;
+    }
+    .heart-frame {
+        width: 100px;
+        height: 100px;
+    }
+    .her-photo {
+        width: 90px;
+        height: 90px;
+        border: 3px solid #ff1493;
+    }
+    .special-message {
+        font-size: 0.85rem;
+        padding: 5px 12px;
+    }
+    .message {
+        padding: 20px 30px;
+        top: 58%;
+    }
+    .title {
+        font-size: 1.8rem;
+        letter-spacing: 2px;
+    }
+    .subtitle {
+        font-size: 1rem;
+    }
+}
+
+/* Extra small phones - Portrait */
+@media (max-width: 480px) and (orientation: portrait) {
+    #countdown-number {
+        font-size: 12rem;
+    }
+    
+    .big-text {
+        font-size: 2.5rem;
+        letter-spacing: 3px;
+        margin-bottom: 15px;
+    }
+    
+    .year-text {
+        font-size: 2rem;
+    }
+}
+
+/* Landscape mobile optimization */
+@media (max-width: 768px) and (orientation: landscape) {
+    .start-photo {
+        max-height: 70vh;
+        max-width: 45vw;
+    }
+    
+    .photo-container {
+        flex-direction: row;
+        gap: 20px;
+    }
+    
+    .hint-text {
+        font-size: 0.9rem;
+        padding: 8px 16px;
+    }
+    
+    .tet-decoration.lantern {
+        font-size: 2rem;
+    }
+    
+    #countdown-number {
+        font-size: 14rem;
+    }
+    
+    .big-text {
+        font-size: 3rem;
+    }
+    
+    .year-text {
+        font-size: 2.3rem;
+    }
+    
+    .tet-year-badge {
+        font-size: 1.2rem;
+        padding: 5px 18px;
+        top: -35px;
+    }
+    
+    .tet-greeting {
+        bottom: 4%;
+    }
+    
+    .greeting-line {
+        font-size: 1.3rem;
+    }
+    
+    .greeting-subtitle {
+        font-size: 0.75rem;
+        letter-spacing: 2px;
+    }
+}
