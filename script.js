@@ -366,9 +366,18 @@ class Particle {
             this.trail.shift();
         }
         
-        this.vx *= this.friction;
-        this.vy *= this.friction;
-        this.vy += this.gravity;
+        // GIAI ĐOẠN NỞ (0-30 frames): Giảm friction để bay xa hơn, tạo hình cầu to
+        // GIAI ĐOẠN RƠI (30+ frames): Friction bình thường + gravity
+        const expansionPhase = this.age <= 30;
+        const currentFriction = expansionPhase ? 0.996 : this.friction;
+        
+        this.vx *= currentFriction;
+        this.vy *= currentFriction;
+        
+        // Gravity chỉ áp dụng sau giai đoạn nở
+        if (!expansionPhase) {
+            this.vy += this.gravity;
+        }
         
         this.x += this.vx;
         this.y += this.vy;
