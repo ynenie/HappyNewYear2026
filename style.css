@@ -719,47 +719,134 @@ body {
     text-align: center;
     z-index: 200;
     pointer-events: none;
+    animation: newyearEntrance 1.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
 }
 
 .big-text {
-    font-size: 6rem;
+    font-size: 7rem;
     font-weight: 900;
-    color: #fff;
-    text-shadow: 
-        0 0 20px #fff,
-        0 0 40px #ffd700,
-        0 0 60px #ff8800,
-        0 0 80px #ff8800,
-        0 0 100px #ff8800;
-    animation: bigTextGlow 1s ease-in-out infinite alternate;
-    margin-bottom: 30px;
-    letter-spacing: 8px;
+    background: linear-gradient(135deg, #ffd700 0%, #ffed4e 25%, #ff4444 50%, #ff8800 75%, #ffd700 100%);
+    background-size: 200% 200%;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    filter: drop-shadow(0 0 20px rgba(255, 215, 0, 0.8))
+            drop-shadow(0 0 40px rgba(255, 136, 0, 0.6))
+            drop-shadow(0 0 60px rgba(255, 68, 68, 0.4))
+            drop-shadow(0 5px 15px rgba(0, 0, 0, 0.5));
+    animation: gradientShift 3s ease infinite, bigTextFloat 3s ease-in-out infinite;
+    margin-bottom: 20px;
+    letter-spacing: 6px;
+    line-height: 1.2;
 }
 
 .year-text {
-    font-size: 4rem;
-    font-weight: bold;
-    color: #ffd700;
-    text-shadow: 
-        0 0 20px #ffd700,
-        0 0 40px #ffd700,
-        0 0 60px #ff8800;
-    animation: pulse 1.5s ease-in-out infinite;
+    font-size: 5rem;
+    font-weight: 900;
+    background: linear-gradient(135deg, #fff 0%, #ffd700 50%, #ffed4e 100%);
+    background-size: 200% 200%;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    filter: drop-shadow(0 0 30px rgba(255, 255, 255, 0.9))
+            drop-shadow(0 0 50px rgba(255, 215, 0, 0.7))
+            drop-shadow(0 0 70px rgba(255, 136, 0, 0.5))
+            drop-shadow(0 5px 20px rgba(0, 0, 0, 0.6));
+    animation: gradientShift 2s ease infinite, yearPulse 2s ease-in-out infinite;
+    letter-spacing: 12px;
 }
 
-@keyframes bigTextGlow {
-    from {
-        text-shadow: 
-            0 0 20px #fff,
-            0 0 40px #ffd700,
-            0 0 60px #ff8800;
+/* Animations */
+@keyframes newyearEntrance {
+    0% {
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(0.5) translateY(50px);
     }
-    to {
-        text-shadow: 
-            0 0 30px #fff,
-            0 0 60px #ffd700,
-            0 0 90px #ff8800,
-            0 0 120px #ff8800;
+    60% {
+        transform: translate(-50%, -50%) scale(1.1) translateY(-10px);
+    }
+    100% {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(1) translateY(0);
+    }
+}
+
+@keyframes gradientShift {
+    0%, 100% {
+        background-position: 0% 50%;
+    }
+    50% {
+        background-position: 100% 50%;
+    }
+}
+
+@keyframes bigTextFloat {
+    0%, 100% {
+        transform: translateY(0px);
+    }
+    50% {
+        transform: translateY(-15px);
+    }
+}
+
+@keyframes yearPulse {
+    0%, 100% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.08);
+    }
+}
+
+/* ===== WISHES TEXT ===== */
+#wishes-text {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+    z-index: 200;
+    pointer-events: none;
+}
+
+.wish-line {
+    font-size: 2.8rem;
+    font-weight: 700;
+    background: linear-gradient(135deg, #fff 0%, #ffd700 30%, #ff8844 70%, #ff4444 100%);
+    background-size: 200% 200%;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    filter: drop-shadow(0 0 25px rgba(255, 215, 0, 0.8))
+            drop-shadow(0 0 45px rgba(255, 136, 68, 0.6))
+            drop-shadow(0 3px 10px rgba(0, 0, 0, 0.5));
+    animation: gradientShift 3s ease infinite, wishFadeIn 1.2s ease-out forwards;
+    margin: 15px 0;
+    opacity: 0;
+    letter-spacing: 2px;
+    line-height: 1.4;
+}
+
+.wish-line:nth-child(1) {
+    animation-delay: 0s, 0s;
+}
+
+.wish-line:nth-child(2) {
+    animation-delay: 0s, 0.4s;
+}
+
+.wish-line:nth-child(3) {
+    animation-delay: 0s, 0.8s;
+}
+
+@keyframes wishFadeIn {
+    0% {
+        opacity: 0;
+        transform: translateY(30px) scale(0.9);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
     }
 }
 
@@ -1019,12 +1106,21 @@ body {
     
     /* Happy New Year - Mobile */
     .big-text {
-        font-size: 3.5rem;
-        letter-spacing: 4px;
-        margin-bottom: 20px;
+        font-size: 3.8rem;
+        letter-spacing: 3px;
+        margin-bottom: 15px;
+        line-height: 1.1;
     }
     .year-text {
-        font-size: 2.8rem;
+        font-size: 3.2rem;
+        letter-spacing: 8px;
+    }
+    
+    /* Wishes - Mobile */
+    .wish-line {
+        font-size: 2rem;
+        margin: 12px 0;
+        letter-spacing: 1.5px;
     }
     
     /* Photo Container - Mobile */
@@ -1064,13 +1160,21 @@ body {
     }
     
     .big-text {
-        font-size: 2.5rem;
-        letter-spacing: 3px;
-        margin-bottom: 15px;
+        font-size: 2.8rem;
+        letter-spacing: 2px;
+        margin-bottom: 12px;
+        line-height: 1.1;
     }
     
     .year-text {
-        font-size: 2rem;
+        font-size: 2.5rem;
+        letter-spacing: 6px;
+    }
+    
+    .wish-line {
+        font-size: 1.5rem;
+        margin: 10px 0;
+        letter-spacing: 1px;
     }
 }
 
@@ -1100,11 +1204,18 @@ body {
     }
     
     .big-text {
-        font-size: 3rem;
+        font-size: 3.2rem;
+        letter-spacing: 2px;
     }
     
     .year-text {
-        font-size: 2.3rem;
+        font-size: 2.8rem;
+        letter-spacing: 6px;
+    }
+    
+    .wish-line {
+        font-size: 1.8rem;
+        margin: 10px 0;
     }
     
     .tet-year-badge {

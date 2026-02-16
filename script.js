@@ -724,10 +724,10 @@ function startCountdown() {
                 setTimeout(() => {
                     countdownContainer.style.display = 'none';
                     
-                    // Hiện text Happy New Year
+                    // Hiện text Chúc Mừng Năm Mới - từ từ hơn
                     newyearText.style.display = 'block';
                     newyearText.style.opacity = '0';
-                    newyearText.style.transition = 'opacity 1s';
+                    newyearText.style.transition = 'opacity 1.5s ease-in';
                     setTimeout(() => {
                         newyearText.style.opacity = '1';
                     }, 50);
@@ -744,17 +744,32 @@ function startCountdown() {
                         autoLaunch();
                     }, 2000);
                     
-                    // Sau 3s: Ẩn text "Happy New Year"
+                    // Sau 6.5s: Ẩn text "Chúc Mừng Năm Mới" và hiện lời chúc
                     setTimeout(() => {
-                        newyearText.style.transition = 'opacity 1s';
+                        newyearText.style.transition = 'opacity 1s ease-out';
                         newyearText.style.opacity = '0';
                         
                         setTimeout(() => {
                             newyearText.style.display = 'none';
                             
-                            // TODO: Thêm kịch bản lời chúc ở đây
+                            // Hiện lời chúc dành cho em
+                            const wishesText = document.getElementById('wishes-text');
+                            if (wishesText) {
+                                wishesText.style.display = 'block';
+                                
+                                // Lời chúc sẽ tự động fade in theo CSS animation
+                                // Giữ lời chúc hiển thị lâu (8s)
+                                setTimeout(() => {
+                                    wishesText.style.transition = 'opacity 1.5s ease-out';
+                                    wishesText.style.opacity = '0';
+                                    
+                                    setTimeout(() => {
+                                        wishesText.style.display = 'none';
+                                    }, 1500);
+                                }, 8000);
+                            }
                         }, 1000);
-                    }, 3000);
+                    }, 6500);
                     
                 }, 500);
             }, 1000);
