@@ -1,4 +1,4 @@
-// Canvas setup with performance optimization
+﻿// Canvas setup with performance optimization
 const canvas = document.getElementById('fireworks');
 const ctx = canvas.getContext('2d', { alpha: false }); // Disable alpha for better performance
 
@@ -398,8 +398,8 @@ class Particle {
         const isFading = this.alpha < 0.3;
         const fadeProgress = isFading ? (this.alpha / 0.3) : 1;
         
-        // Draw trail - B\u1ede TR\u00caN MOBILE \u0111\u1ec3 gi\u1ea3m lag
-        if (!isMobile && this.type !== 'glitter' && !isFading && this.trail.length > 1) {
+        // Draw trail - Enabled on all devices for beautiful effects
+        if (this.type !== 'glitter' && !isFading && this.trail.length > 1) {
             ctx.globalAlpha = this.alpha * 0.5;
             ctx.strokeStyle = this.fadingColor;
             ctx.lineWidth = this.size * 0.6;
@@ -412,7 +412,7 @@ class Particle {
             ctx.stroke();
         }
         
-        // Draw particle - \u0110\u01a0N GI\u1ea2N HO\u00c1 TR\u00caN MOBILE
+        // Draw particle - Unified gradient rendering for all devices
         ctx.globalAlpha = this.alpha;
         
         let currentSize = this.size;
@@ -420,42 +420,32 @@ class Particle {
             currentSize = this.size * (0.3 + fadeProgress * 0.7);
         }
         
-        if (isMobile) {
-            // MOBILE: V\u1ebd s\u1eeba gi\u1ea3n, kh\u00f4ng gradient, kh\u00f4ng shadow
-            ctx.fillStyle = this.fadingColor;
-            const halfSize = currentSize * 1.8;
-            ctx.fillRect(this.x - halfSize, this.y - halfSize, halfSize * 2, halfSize * 2);
-            
-            // Core nh\u1ecf s\u00e1ng h\u01a1n
-            ctx.globalAlpha = this.alpha * 1.2;
-            ctx.fillRect(this.x - currentSize * 0.4, this.y - currentSize * 0.4, currentSize * 0.8, currentSize * 0.8);
+        // Unified beautiful rendering with gradient for all devices
+        const glowSize = (this.type === 'outer' || this.type === 'glitter') ? 3 : 2.5;
+        const gradient = ctx.createRadialGradient(this.x, this.y, 0, this.x, this.y, currentSize * glowSize);
+        
+        if (isFading) {
+            gradient.addColorStop(0, this.fadingColor);
+            gradient.addColorStop(0.3, hexToRgba(this.fadingColor, 0.6 * fadeProgress));
+            gradient.addColorStop(0.7, hexToRgba(this.fadingColor, 0.2 * fadeProgress));
+            gradient.addColorStop(1, 'transparent');
         } else {
-            // DESKTOP: V\u1ebd \u0111\u1eb9p v\u1edbi gradient
-            const glowSize = (this.type === 'outer' || this.type === 'glitter') ? 3 : 2.5;
-            const gradient = ctx.createRadialGradient(this.x, this.y, 0, this.x, this.y, currentSize * glowSize);
-            
-            if (isFading) {
-                gradient.addColorStop(0, this.fadingColor);
-                gradient.addColorStop(0.3, hexToRgba(this.fadingColor, 0.6 * fadeProgress));
-                gradient.addColorStop(0.7, hexToRgba(this.fadingColor, 0.2 * fadeProgress));
-                gradient.addColorStop(1, 'transparent');
-            } else {
-                gradient.addColorStop(0, this.fadingColor);
-                gradient.addColorStop(0.5, hexToRgba(this.fadingColor, 0.4));
-                gradient.addColorStop(1, 'transparent');
-            }
-            
-            ctx.fillStyle = gradient;
-            const gSize = currentSize * glowSize;
-            ctx.fillRect(this.x - gSize, this.y - gSize, gSize * 2, gSize * 2);
-            
-            // Core v\u1edbi shadow nh\u1eb9
-            ctx.shadowBlur = isFading ? 10 : 6;
-            ctx.shadowColor = this.fadingColor;
-            ctx.fillStyle = this.fadingColor;
-            ctx.fillRect(this.x - currentSize * 0.5, this.y - currentSize * 0.5, currentSize, currentSize);
-            ctx.shadowBlur = 0;
+            gradient.addColorStop(0, this.fadingColor);
+            gradient.addColorStop(0.5, hexToRgba(this.fadingColor, 0.4));
+            gradient.addColorStop(1, 'transparent');
         }
+        
+        ctx.fillStyle = gradient;
+        const gSize = currentSize * glowSize;
+        ctx.fillRect(this.x - gSize, this.y - gSize, gSize * 2, gSize * 2);
+        
+        // Core with shadow - slightly reduced on mobile
+        const shadowBlurValue = isMobile ? (isFading ? 8 : 5) : (isFading ? 10 : 6);
+        ctx.shadowBlur = shadowBlurValue;
+        ctx.shadowColor = this.fadingColor;
+        ctx.fillStyle = this.fadingColor;
+        ctx.fillRect(this.x - currentSize * 0.5, this.y - currentSize * 0.5, currentSize, currentSize);
+        ctx.shadowBlur = 0;
         
         ctx.globalAlpha = 1;
     }
@@ -624,7 +614,7 @@ function animate(currentTime) {
     lastTime = currentTime;
     
     // Clear with optimized fade
-    const fadeAlpha = isMobile ? 0.3 : 0.2;
+    const fadeAlpha = isMobile ? 0.08 : 0.12;
     ctx.fillStyle = `rgba(0, 0, 0, ${fadeAlpha})`;
     ctx.fillRect(0, 0, canvas.width, canvas.height);
     
