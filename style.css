@@ -720,7 +720,6 @@ body {
     text-align: center;
     z-index: 200;
     pointer-events: none;
-    animation: newyearEntrance 1.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
 }
 
 .big-text {
@@ -758,20 +757,6 @@ body {
 }
 
 /* Animations */
-@keyframes newyearEntrance {
-    0% {
-        opacity: 0;
-        transform: translate(-50%, -50%) scale(0.5) translateY(50px);
-    }
-    60% {
-        transform: translate(-50%, -50%) scale(1.1) translateY(-10px);
-    }
-    100% {
-        opacity: 1;
-        transform: translate(-50%, -50%) scale(1) translateY(0);
-    }
-}
-
 @keyframes gradientShift {
     0%, 100% {
         background-position: 0% 50%;
@@ -821,29 +806,16 @@ body {
     filter: drop-shadow(0 0 25px rgba(255, 215, 0, 0.8))
             drop-shadow(0 0 45px rgba(255, 136, 68, 0.6))
             drop-shadow(0 3px 10px rgba(0, 0, 0, 0.5));
-    animation: gradientShift 3s ease infinite, wishFadeIn 1.2s ease-out forwards;
+    animation: gradientShift 3s ease infinite;
     margin: 15px 0;
-    opacity: 0;
     letter-spacing: 2px;
     line-height: 1.4;
-}
-
-.wish-line:nth-child(1) {
-    animation-delay: 0s, 0s;
-}
-
-.wish-line:nth-child(2) {
-    animation-delay: 0s, 0.4s;
-}
-
-.wish-line:nth-child(3) {
-    animation-delay: 0s, 0.8s;
 }
 
 @keyframes wishFadeIn {
     0% {
         opacity: 0;
-        transform: translateY(30px) scale(0.9);
+        transform: translateY(20px) scale(0.95);
     }
     100% {
         opacity: 1;

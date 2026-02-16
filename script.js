@@ -721,32 +721,36 @@ function startCountdown() {
                     countdownContainer.style.transition = 'opacity 0.5s';
                     countdownContainer.style.opacity = '0';
                 
-                setTimeout(() => {
-                    countdownContainer.style.display = 'none';
+                    setTimeout(() => {
+                        countdownContainer.style.display = 'none';
+                    }, 500);
                     
-                    // Hiện text Chúc Mừng Năm Mới - từ từ hơn
+                    // BẮT ĐẦU NGAY - Pháo hoa và text cùng lúc để đồng bộ
+                    
+                    // 1. Hiện text Chúc Mừng Năm Mới NGAY (không delay)
                     newyearText.style.display = 'block';
                     newyearText.style.opacity = '0';
-                    newyearText.style.transition = 'opacity 1.5s ease-in';
-                    setTimeout(() => {
+                    newyearText.style.transition = 'opacity 0.8s ease-out';
+                    // Trigger animation ngay
+                    requestAnimationFrame(() => {
                         newyearText.style.opacity = '1';
-                    }, 50);
+                    });
                     
-                    // BẮT ĐẦU PHÁO HOA RẦM RỘ!
+                    // 2. BẮN 5 PHÁO HOA ĐỒNG THỜI
                     for (let i = 0; i < 5; i++) {
                         setTimeout(() => {
                             launchRocket();
                         }, i * 300);
                     }
                     
-                    // Auto launch sau đó
+                    // 3. Auto launch tiếp tục
                     setTimeout(() => {
                         autoLaunch();
                     }, 2000);
                     
-                    // Sau 6.5s: Ẩn text "Chúc Mừng Năm Mới" và hiện lời chúc
+                    // 4. Sau 5s: Ẩn text và hiện lời chúc (timing ngắn hơn, khớp với pháo hoa)
                     setTimeout(() => {
-                        newyearText.style.transition = 'opacity 1s ease-out';
+                        newyearText.style.transition = 'opacity 0.8s ease-out';
                         newyearText.style.opacity = '0';
                         
                         setTimeout(() => {
@@ -756,26 +760,25 @@ function startCountdown() {
                             const wishesText = document.getElementById('wishes-text');
                             if (wishesText) {
                                 wishesText.style.display = 'block';
+                                wishesText.style.opacity = '1';
                                 
-                                // Lời chúc sẽ tự động fade in theo CSS animation
-                                // Giữ lời chúc hiển thị lâu (8s)
+                                // Lời chúc hiển thị 7s rồi mới biến mất
                                 setTimeout(() => {
-                                    wishesText.style.transition = 'opacity 1.5s ease-out';
+                                    wishesText.style.transition = 'opacity 1.2s ease-out';
                                     wishesText.style.opacity = '0';
                                     
                                     setTimeout(() => {
                                         wishesText.style.display = 'none';
-                                    }, 1500);
-                                }, 8000);
+                                    }, 1200);
+                                }, 7000);
                             }
-                        }, 1000);
-                    }, 6500);
+                        }, 800);
+                    }, 5000);
                     
-                }, 500);
-            }, 1000);
-            
-            clearInterval(countdownInterval);
-        }
+                }, 1000);
+                
+                clearInterval(countdownInterval);
+            }
     }, 1000);
 }
 
