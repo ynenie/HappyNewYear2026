@@ -71,6 +71,7 @@
     align-items: center;
     gap: 35px;
     padding: 20px;
+    margin-top: 8vh;
     z-index: 2;
 }
 
