@@ -286,41 +286,41 @@ class Particle {
         // Cấu hình theo từng loại particle
         switch(type) {
             case 'outer':  // Vòng ngoài vàng
-                speed = Math.random() * 2.5 + 5.5;
+                speed = Math.random() * 2.5 + 6.5;  // Tăng từ 5.5 → 6.5
                 size = (Math.random() * 1.8 + 2.8) * scaleFactor;
-                decay = 0.003;
+                decay = 0.0025;  // Giảm từ 0.003 → 0.0025
                 maxTrail = 14;
                 this.color = '#ffaa44';
                 break;
                 
             case 'middle':  // Vòng giữa màu chính
-                speed = Math.random() * 2 + 4;
+                speed = Math.random() * 2 + 5;  // Tăng từ 4 → 5
                 size = (Math.random() * 1.5 + 2) * scaleFactor;
-                decay = 0.0035;
+                decay = 0.003;  // Giảm từ 0.0035 → 0.003
                 maxTrail = 10;
                 this.color = colors[Math.floor(Math.random() * colors.length)];
                 break;
                 
             case 'inner':  // Lõi trong
-                speed = Math.random() * 1.5 + 2.5;
+                speed = Math.random() * 1.5 + 3.5;  // Tăng từ 2.5 → 3.5
                 size = (Math.random() * 1.2 + 1.5) * scaleFactor;
-                decay = 0.004;
+                decay = 0.0035;  // Giảm từ 0.004 → 0.0035
                 maxTrail = 8;
                 this.color = colors[Math.floor(Math.random() * colors.length)];
                 break;
                 
             case 'spark':  // Tia lửa nhỏ
-                speed = Math.random() * 3 + 6;  // Bay nhanh
+                speed = Math.random() * 3 + 7;  // Tăng từ 6 → 7
                 size = (Math.random() * 0.8 + 0.8) * scaleFactor;
-                decay = 0.006;  // Chết nhanh
+                decay = 0.005;  // Giảm từ 0.006 → 0.005
                 maxTrail = 6;
                 this.color = '#ffdd88';
                 break;
                 
             case 'glitter':  // Sáng lấp lánh
-                speed = Math.random() * 1 + 1.5;  // Bay chậm
+                speed = Math.random() * 1 + 2;  // Tăng từ 1.5 → 2
                 size = (Math.random() * 1 + 1.2) * scaleFactor;
-                decay = 0.005;
+                decay = 0.004;  // Giảm từ 0.005 → 0.004
                 maxTrail = 4;
                 this.color = '#ffffee';
                 this.twinkle = true;  // Hiệu ứng nhấp nháy
@@ -348,8 +348,8 @@ class Particle {
         
         this.alpha = 1;
         this.decay = decay;
-        this.gravity = 0.05 * scaleFactor;
-        this.friction = 0.988;
+        this.gravity = 0.02 * scaleFactor;  // Giảm từ 0.05 → 0.02 để bay lâu hơn
+        this.friction = 0.993;  // Tăng từ 0.988 → 0.993 để giữ vận tốc lâu hơn
         this.size = size;
         this.maxTrail = maxTrail;
         
